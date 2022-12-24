@@ -41,6 +41,7 @@ class Quarto(object):
     def __init__(self) -> None:
         self.__board = np.ones(shape=(self.BOARD_SIDE, self.BOARD_SIDE), dtype=int) * -1
         self.__pieces = []
+        #binary code -> no equal pieces
         self.__pieces.append(Piece(False, False, False, False))  # 0
         self.__pieces.append(Piece(False, False, False, True))  # 1
         self.__pieces.append(Piece(False, False, True, False))  # 2
