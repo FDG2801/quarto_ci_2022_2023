@@ -33,6 +33,7 @@ class Piece(object):
 
 
 class Quarto(object):
+    #mostly utils function
 
     MAX_PLAYERS = 2
     BOARD_SIDE = 4
