@@ -5,6 +5,7 @@ import logging
 import argparse
 import random
 import quarto
+import minimax
 
 
 class RandomPlayer(quarto.Player):
@@ -12,17 +13,32 @@ class RandomPlayer(quarto.Player):
 
     def __init__(self, quarto: quarto.Quarto) -> None:
         super().__init__(quarto)
-    #choose piece -> int 
+
     def choose_piece(self) -> int:
         return random.randint(0, 15)
-    Z
+
     def place_piece(self) -> tuple[int, int]:
         return random.randint(0, 3), random.randint(0, 3)
+
+class MinMax(quarto.Player):
+    """MinMax agent"""
+
+    def __init__(self, quarto: quarto.Quarto) -> None:
+        super().__init__(quarto)
+
+    def choose_piece(self) -> int:
+        ''' choose_piece using minmax ??? '''
+        #function to chose_piece
+        return random.randint(0, 15)
+
+    def place_piece(self) -> tuple[int, int]:
+        '''place_piece using minmax ??? '''
+        return minimax(self.get_game(),5,False) #problem here
 
 
 def main():
     game = quarto.Quarto()
-    game.set_players((RandomPlayer(game), RandomPlayer(game)))
+    game.set_players((RandomPlayer(game), MinMax(game)))
     winner = game.run()
     logging.warning(f"main: Winner: player {winner}")
 

@@ -33,7 +33,6 @@ class Piece(object):
 
 
 class Quarto(object):
-    #mostly utils function
 
     MAX_PLAYERS = 2
     BOARD_SIDE = 4
@@ -41,7 +40,6 @@ class Quarto(object):
     def __init__(self) -> None:
         self.__board = np.ones(shape=(self.BOARD_SIDE, self.BOARD_SIDE), dtype=int) * -1
         self.__pieces = []
-        #binary code -> no equal pieces
         self.__pieces.append(Piece(False, False, False, False))  # 0
         self.__pieces.append(Piece(False, False, False, True))  # 1
         self.__pieces.append(Piece(False, False, True, False))  # 2
@@ -61,6 +59,10 @@ class Quarto(object):
         self.__current_player = 0
         self.__players = ()
         self.__selected_piece_index = -1
+        #modified#
+        self.__last_board = None
+        self.__last_choosen_piece = None
+        ##########
 
     def set_players(self, players: tuple[Player, Player]):
         self.__players = players
@@ -80,8 +82,19 @@ class Quarto(object):
         '''
         if self.__placeable(x, y):
             self.__board[y, x] = self.__selected_piece_index
+            #MODIFIED#
+            self.__last_board = copy.deepcopy(self.__board)
+            self__last_choosen_piece = self.__selected_piece_index
+            ##########
             return True
         return False
+
+    ##THIS METHOD WAS ADDED BY US##
+    def undo_last_move(self):
+        self.__board = self.__last_board
+        self.__selected_piece_index = self.__last_choosen_piece
+    ###############################
+
 
     def __placeable(self, x: int, y: int) -> bool:
         return not (y < 0 or x < 0 or x > 3 or y > 3 or self.__board[y, x] >= 0)
