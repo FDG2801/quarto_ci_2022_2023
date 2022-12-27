@@ -1,6 +1,3 @@
-# Free for personal or classroom use; see 'LICENSE.md' for details.
-# https://github.com/squillero/computational-intelligence
-
 import numpy as np
 from abc import abstractmethod
 import copy
