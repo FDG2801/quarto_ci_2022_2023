@@ -28,6 +28,13 @@ class Piece(object):
         self.SOLID = solid
         self.SQUARE = square
 
+    def return_flags(self, piece_val: int):
+        high = piece_val & 0b1000
+        coloured = piece_val & 0b0100
+        solid = piece_val & 0b0010
+        square = piece_val & 0b0001
+        return high, coloured, solid, square
+
 
 class Quarto(object):
 
@@ -108,7 +115,7 @@ class Quarto(object):
         print("\n -------------------\n")
         print(f"Selected piece: {self.__selected_piece_index}\n")
 
-    def get_piece_charachteristics(self, index: int) -> Piece:
+    def get_piece_characteristics(self, index: int) -> Piece:
         '''
         Gets charachteristics of a piece (index-based)
         '''
@@ -295,16 +302,16 @@ class Quarto(object):
         '''
         winner = -1
         while winner < 0 and not self.check_finished():
-            self.print()
+            #self.print()
             piece_ok = False
             while not piece_ok:
                 piece_ok = self.select(self.__players[self.__current_player].choose_piece())
             piece_ok = False
             self.__current_player = (self.__current_player + 1) % self.MAX_PLAYERS
-            self.print()
+            #self.print()
             while not piece_ok:
                 x, y = self.__players[self.__current_player].place_piece()
                 piece_ok = self.place(x, y)
             winner = self.check_winner()
-        self.print()
+        #self.print()
         return winner

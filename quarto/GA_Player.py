@@ -90,7 +90,7 @@ class GA_Player(quarto.Player):
             self.genome = dict()
 
     def get_game(self) -> quarto.Quarto:
-        return super().get_quarto()
+        return super().get_game()
 
     def choose_piece(self) -> int:
         game = self.get_game()

@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-EVAL_TIE = 0  #  this draw value only matters in the endgame, where the heuristic doesn't matter anymore
+EVAL_TIE = 0  # this draw value only matters in the endgame, where the heuristic doesn't matter anymore
 EVAL_WIN = 9
 MAX_DEPTH = 4
 
@@ -16,6 +16,8 @@ coloured=piece_val & 0b0100
 solid=piece_val & 0b0010
 square=piece_val & 0b0001
 '''
+
+
 ### BACKUP 1
 # def minimax(quarto,depth:int,max_player:bool, chosen_piece, alpha=float('-inf'),beta=float('inf')):
 #     game_state=deepcopy(quarto)
@@ -100,25 +102,28 @@ def minimax(game, depth, maximizingPlayer, chosenPiece=None, alpha=-float('inf')
                 break
         return bestValue
 
+
 # Adapted
 def get_all_possible_states(game_state):
     '''
     get basically all the boards
     '''
-    board=game_state.get_status_board()
+    board = game_state.get_status_board()
     return board
 
-#Adapted 
+
+# Adapted
 def get_all_possible_moves(game_state):
-    list=[]
-    board=game_state.get_status_board()
+    list = []
+    board = game_state.get_status_board()
     for i in board:
         for j in board[0]:
-            if board[i][j]==-1:
-                list.append([i,j])
+            if board[i][j] == -1:
+                list.append([i, j])
     return list
 
-#new
+
+# new
 # def get_best_move(board,depth):
 #     '''
 #     '''
@@ -136,11 +141,11 @@ def state_eval(game_state):
     '''
     Computes the evaluation of the state of the game
     '''
-    game=game_state.get_game()
+    game = game_state.get_game()
     if game.check_winner():
         return EVAL_WIN
-    #is there the possibility? 
-    #elif game_state[0].is_full():
-        #return EVAL_TIE
+    # is there the possibility?
+    # elif game_state[0].is_full():
+    # return EVAL_TIE
     else:
-        return 0 
+        return 0
