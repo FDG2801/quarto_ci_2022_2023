@@ -23,6 +23,47 @@ class MinMax(quarto.Player):
         #return minimax_function(self.get_game(), 5, False)  # problem here
         return random.randint(0, 3), random.randint(0, 3)
 
+'''
+def choose_piece(self) -> int:
+    """Uses the minmax algorithm to choose a piece to give to the opponent."""
+    best_value = float('-inf')
+    best_piece = None
+    for piece in self.quarto.pieces:
+        value = 0
+        for move in self.quarto.get_valid_moves():
+            x, y = move
+            game = copy.deepcopy(self.quarto)
+            game.make_move(x, y, piece)
+        value += game.minmax(3, float('-inf'), float('inf'), False)
+        if value > best_value:
+            best_value = value
+            best_piece = piece
+    return best_piece
+
+def place_piece(self) -> Tuple[int, int]:
+    """Uses the minmax algorithm to choose a move to make on the board."""
+    best_value = float('-inf')
+    best_move = None
+    for move in self.quarto.get_valid_moves():
+        x, y = move
+        game = copy.deepcopy(self.quarto)
+        game.make_move(x, y, self.quarto.chosen_piece)
+        value = game.minmax(3, float('-inf'), float('inf'), True)
+        if value > best_value:
+        best_value = value
+        best_move = move
+    return best_move
+
+def make_move(self, x: int, y: int, piece: int) -> None:
+    """Makes the move (x, y) on the board with the given piece."""
+    self.board[x][j] = piece
+    self.pieces.remove(piece)
+    self.current_player *= -1
+
+This function sets the value of the position (x, y) on the board to the given piece, 
+removes the piece from the list of remaining pieces, and flips the current player (since it is now the other player's turn).
+'''
+
 
 def main():
     # print("GA-----------------------------")
