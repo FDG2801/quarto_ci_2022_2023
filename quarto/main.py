@@ -2,7 +2,7 @@ import logging
 import argparse
 import random
 import quarto
-from minimax import minimax
+#from minimax import minimax_function
 from GA_Player import evolve, GA_Player
 from RandomPlayer import RandomPlayer
 
@@ -20,24 +20,25 @@ class MinMax(quarto.Player):
 
     def place_piece(self) -> tuple[int, int]:
         '''place_piece using minmax ??? '''
-        return minimax(self.get_game(), 5, False)  # problem here
+        #return minimax_function(self.get_game(), 5, False)  # problem here
+        return random.randint(0, 3), random.randint(0, 3)
 
 
 def main():
-    print("GA-----------------------------")
-    game = quarto.Quarto()
-    find_genome = evolve()
-
-    game.set_players((RandomPlayer(game), GA_Player(game, find_genome)))
-    winner = game.run()
-    logging.info(f"main: Winner: player {winner}")
-
-    # print("MINMAX-----------------------------")
+    # print("GA-----------------------------")
     # game = quarto.Quarto()
-    #
-    # game.set_players((RandomPlayer(game), MinMax(game)))
+    # find_genome = evolve()
+
+    # game.set_players((RandomPlayer(game), GA_Player(game, find_genome)))
     # winner = game.run()
     # logging.info(f"main: Winner: player {winner}")
+
+    print("MINMAX-----------------------------")
+    game = quarto.Quarto()
+    
+    game.set_players((RandomPlayer(game), MinMax(game)))
+    winner = game.run()
+    logging.info(f"main: Winner: player {winner}")
 
 
 if __name__ == '__main__':

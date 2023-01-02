@@ -1,4 +1,5 @@
 from copy import deepcopy
+from main import MinMax
 
 EVAL_TIE = 0  # this draw value only matters in the endgame, where the heuristic doesn't matter anymore
 EVAL_WIN = 9
@@ -75,15 +76,16 @@ square=piece_val & 0b0001
 #                     break
 #         return min_eval,best_move 
 # ------------------------------------------------------------------------------------------------------------------------------ #
-def minimax(game, depth, maximizingPlayer, chosenPiece=None, alpha=-float('inf'), beta=float('inf')):
-    if depth == 0 or game.game_over():
+def minimax_function(game, depth, maximizingPlayer, chosenPiece=None, alpha=-float('inf'), beta=float('inf')):
+    if depth == 0:
         return state_eval(game)
 
     if maximizingPlayer:
         bestValue = -float('inf')
         for move in get_all_possible_moves(game):
             game.place(move[0], move[1])
-            result = minimax(game, depth - 1, False, game.choose_piece(move), alpha, beta)
+            #choose_piece (move) is now_choose_piece
+            result = minimax_function(game, depth - 1, False, MinMax.choose_piece(), alpha, beta)
             game.undo_last_move()
             bestValue = max(bestValue, result)
             alpha = max(alpha, bestValue)
@@ -94,7 +96,8 @@ def minimax(game, depth, maximizingPlayer, chosenPiece=None, alpha=-float('inf')
         bestValue = float('inf')
         for move in get_all_possible_moves(game):
             game.place(move[0], move[1])
-            result = minimax(game, depth - 1, True, game.choose_piece(move), alpha, beta)
+            #choose_piece (move) is now_choose_piece
+            result = minimax_function(game, depth - 1, True, MinMax.choose_piece(), alpha, beta)
             game.undo_last_move()
             bestValue = min(bestValue, result)
             beta = min(beta, bestValue)
@@ -108,20 +111,27 @@ def get_all_possible_states(game_state):
     '''
     get basically all the boards
     '''
-    board = game_state.get_status_board()
+    board = game_state.get_board_status()
     return board
 
 
-# Adapted
+# get list of valid moves
 def get_all_possible_moves(game_state):
     list = []
-    board = game_state.get_status_board()
-    for i in board:
-        for j in board[0]:
+    board = game_state.get_board_status()
+    #print("This is board: ", board)
+    '''
+    Example of board: 
+    [[-1 -1 -1 -1]
+    [-1 -1 -1 -1]
+    [-1 -1 -1 -1]
+    [-1 -1 -1 -1]]
+    '''
+    for i in range(4):
+        for j in range(4):
             if board[i][j] == -1:
-                list.append([i, j])
+                list.append((i, j))
     return list
-
 
 # new
 # def get_best_move(board,depth):
@@ -144,7 +154,7 @@ def state_eval(game_state):
     game = game_state.get_game()
     if game.check_winner():
         return EVAL_WIN
-    # is there the possibility?
+    # is there the possibility for a tie?
     # elif game_state[0].is_full():
     # return EVAL_TIE
     else:
