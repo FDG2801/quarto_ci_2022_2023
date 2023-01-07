@@ -2,3 +2,4 @@
 # https://github.com/squillero/computational-intelligence
 
 from .objects import *
+from .utils import *

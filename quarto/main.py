@@ -1,28 +1,34 @@
 # Free for personal or classroom use; see 'LICENSE.md' for details.
 # https://github.com/squillero/computational-intelligence
 
+import itertools
 import logging
 import argparse
 import random
-import quarto
+from .quarto.objects import Player, Quarto
+from .reinforcement.rl_agent import QLAgent
 
-
-class RandomPlayer(quarto.Player):
+class RandomPlayer(Player):
     """Random player"""
 
-    def __init__(self, quarto: quarto.Quarto) -> None:
-        super().__init__(quarto)
+    def __init__(self, game: Quarto) -> None:
+        super().__init__(game)
     #choose piece -> int 
     def choose_piece(self) -> int:
         return random.randint(0, 15)
-    Z
     def place_piece(self) -> tuple[int, int]:
         return random.randint(0, 3), random.randint(0, 3)
 
 
 def main():
-    game = quarto.Quarto()
-    game.set_players((RandomPlayer(game), RandomPlayer(game)))
+    info = {
+        'alpha': 0.3,
+        'gamma': 0.9,
+        'epsilon': 0.1
+    }
+
+    game = Quarto()
+    game.set_players((RandomPlayer(game), QLAgent(game, info)))
     winner = game.run()
     logging.warning(f"main: Winner: player {winner}")
 
