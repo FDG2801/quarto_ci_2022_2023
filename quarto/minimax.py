@@ -7,8 +7,8 @@ MAX_DEPTH = 4
 
 '''
 TODO:
-- game_state must be adapted with the professor's code
-- test
+- game_state must be adapted with the professor's code OK
+- test OK
 - add heuristics (?) to choose piece/to place the piece
 
 
@@ -77,16 +77,18 @@ square=piece_val & 0b0001
 #         return min_eval,best_move 
 # ------------------------------------------------------------------------------------------------------------------------------ #
 def minimax_function(game, depth, maximizingPlayer, chosenPiece=None, alpha=-float('inf'), beta=float('inf')):
+    # Base case: return the score if the game is over or the depth limit has been reached
     if depth == 0:
         return state_eval(game)
 
+    # Recursive case: try all possible moves and choose the best one
     if maximizingPlayer:
         bestValue = -float('inf')
         for move in get_all_possible_moves(game):
             game.place(move[0], move[1])
             #choose_piece (move) is now_choose_piece
             result = minimax_function(game, depth - 1, False, MinMax.choose_piece(), alpha, beta)
-            game.undo_last_move()
+            #game.undo_last_move()
             bestValue = max(bestValue, result)
             alpha = max(alpha, bestValue)
             if beta <= alpha:
@@ -98,12 +100,16 @@ def minimax_function(game, depth, maximizingPlayer, chosenPiece=None, alpha=-flo
             game.place(move[0], move[1])
             #choose_piece (move) is now_choose_piece
             result = minimax_function(game, depth - 1, True, MinMax.choose_piece(), alpha, beta)
-            game.undo_last_move()
+            #game.undo_last_move()
             bestValue = min(bestValue, result)
             beta = min(beta, bestValue)
             if beta <= alpha:
                 break
         return bestValue
+
+    # def undo_last_move(game):
+    #     game.__board = game.__last_board
+    #     game.__selected_piece_index = game.__last_choosen_piece
 
 
 # Adapted

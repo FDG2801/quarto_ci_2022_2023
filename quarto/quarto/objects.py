@@ -67,8 +67,8 @@ class Quarto(object):
         self.__current_player = 0
         self.__selected_piece_index = -1
         #modified#
-        self.__last_board = None
-        self.__last_choosen_piece = None
+        #self.__last_board = None
+        #self.__last_choosen_piece = None
         ##########
 
     def set_players(self, players: tuple[Player, Player]):
@@ -98,16 +98,16 @@ class Quarto(object):
             self.__board[y, x] = self.__selected_piece_index
             #MODIFIED#
             self.__last_board = copy.deepcopy(self.__board)
-            self__last_choosen_piece = self.__selected_piece_index
+            #self.__last_choosen_piece = self.__selected_piece_index
             ##########
             return True
         return False
 
-    ##THIS METHOD WAS ADDED BY US##
-    def undo_last_move(self):
-        self.__board = self.__last_board
-        self.__selected_piece_index = self.__last_choosen_piece
-    ###############################
+    # ##THIS METHOD WAS ADDED BY US##
+    # def undo_last_move(self):
+    #     self.__board = self.__last_board
+    #     self.__selected_piece_index = self.__last_choosen_piece
+    # ###############################
 
 
     def __placeable(self, x: int, y: int) -> bool:
