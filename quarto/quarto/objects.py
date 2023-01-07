@@ -28,12 +28,12 @@ class Piece(object):
         self.SOLID = solid
         self.SQUARE = square
 
-    def return_flags(self, piece_val: int):
-        high = piece_val & 0b1000
-        coloured = piece_val & 0b0100
-        solid = piece_val & 0b0010
-        square = piece_val & 0b0001
-        return high, coloured, solid, square
+    # def return_flags(self, piece_val: int):
+    #     high = piece_val & 0b1000
+    #     coloured = piece_val & 0b0100
+    #     solid = piece_val & 0b0010
+    #     square = piece_val & 0b0001
+    #     return high, coloured, solid, square
 
 
 class Quarto(object):
@@ -42,6 +42,10 @@ class Quarto(object):
     BOARD_SIDE = 4
 
     def __init__(self) -> None:
+        self.__players = ()
+        self.reset()
+
+    def reset(self):
         self.__board = np.ones(shape=(self.BOARD_SIDE, self.BOARD_SIDE), dtype=int) * -1
         self.__pieces = []
         self.__pieces.append(Piece(False, False, False, False))  # 0
@@ -61,7 +65,6 @@ class Quarto(object):
         self.__pieces.append(Piece(True, True, True, False))  # 14
         self.__pieces.append(Piece(True, True, True, True))  # 15
         self.__current_player = 0
-        self.__players = ()
         self.__selected_piece_index = -1
         #modified#
         self.__last_board = None
@@ -70,6 +73,13 @@ class Quarto(object):
 
     def set_players(self, players: tuple[Player, Player]):
         self.__players = players
+
+    def get_current_player(self) -> int:
+        '''
+        Gets the current player
+        '''
+        return self.__current_player
+
 
     def select(self, pieceIndex: int) -> bool:
         '''
