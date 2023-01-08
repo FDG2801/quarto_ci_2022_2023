@@ -21,17 +21,17 @@ class MinMax(quarto.Player):
         # function to chose_piece
         return random.randint(0, 15) 
         # # ------------------------------------------------------
-        # # Choose the best piece to play with using a heuristic function
+        # Choose the best piece to play with using a heuristic function
         # quarto=self.get_game()
         # best_score = -float('inf')
         # best_piece = None
-        # for piece in range(0,16):
+        # for piece in range(15):
         #     if self.piece_available(piece):
-        #         board=quarto.get_board_status()
-        #         score = self.heuristic(board)
+        #         score = self.heuristic()
         #         if score > best_score:
         #             best_score = score
         #             best_piece = piece
+        # print('best piece: ',best_piece)	
         # return best_piece
 
     def place_piece (self) -> tuple[int, int]:
@@ -39,18 +39,27 @@ class MinMax(quarto.Player):
         print("Placing piece -------------- ")
         #return minimax_function(self.get_game(), 5, False)  # problem here
         return random.randint(0, 3), random.randint(0, 3)
-        # # -------------------------------------------------------------------
-        #     # Choose a position to place the piece based on a heuristic function
+        # -------------------------------------------------------------------
+            # Choose a position to place the piece based on a heuristic function
         # quarto=self.get_game()
         # best_score = -float('inf')
         # best_move = None
         # for move in self.possible_moves():
         #     new_board = quarto.get_board_status()
-        #     score = self.heuristic(new_board)
+        #     score = self.heuristic()
         #     if score > best_score:
         #         best_score = score
         #         best_move = move
+        #         print("Best move: ",best_move)
+        #         piece=self.choose_piece()
+        #         self.modify_board(new_board,piece,best_move)
         # return best_move
+
+    # def modify_board(self, board,piece,pos):
+    #     print("Modifying board ------")
+    #     board[pos[0]][pos[1]] = piece
+    #     print("Modified board ------")
+    #     print(board)
 
 
     # def piece_available(self, piece) -> bool:
@@ -64,7 +73,7 @@ class MinMax(quarto.Player):
     #                 return False
     #     return True
 
-    # def heuristic(self,board):
+    # def heuristic(self):
     # # Calculate a score for the given board position and piece
     # # Higher values are better
     #     print("checking heuristic -------------- ")
@@ -72,6 +81,7 @@ class MinMax(quarto.Player):
     #     score = 0
     #     for move in self.possible_moves():
     #         new_board = quarto.get_board_status()
+    #         print("new_board in POSSIBLE MOVES: ",new_board)
     #         if self.game_over(new_board):
     #             # If the move leads to a win, return a high score
     #             return float('inf')
@@ -83,6 +93,7 @@ class MinMax(quarto.Player):
     #     print("possible_moves -------------- ")
     #     quarto=self.get_game()
     #     board=quarto.get_board_status()
+    #     print("BOARD in POSSIBLE MOVES: ",board)
     #     moves = []
     #     for i in range(4):
     #         for j in range(4):
@@ -142,48 +153,6 @@ class MinMax(quarto.Player):
     #             # Bonus points for having a piece to play in an incomplete row
     #             score += 5
     #         return score
-
-'''
-def choose_piece(self) -> int:
-    """Uses the minmax algorithm to choose a piece to give to the opponent."""
-    best_value = float('-inf')
-    best_piece = None
-    for piece in self.quarto.pieces:
-        value = 0
-        for move in self.quarto.get_valid_moves():
-            x, y = move
-            game = copy.deepcopy(self.quarto)
-            game.make_move(x, y, piece)
-        value += game.minmax(3, float('-inf'), float('inf'), False)
-        if value > best_value:
-            best_value = value
-            best_piece = piece
-    return best_piece
-
-def place_piece(self) -> Tuple[int, int]:
-    """Uses the minmax algorithm to choose a move to make on the board."""
-    best_value = float('-inf')
-    best_move = None
-    for move in self.quarto.get_valid_moves():
-        x, y = move
-        game = copy.deepcopy(self.quarto)
-        game.make_move(x, y, self.quarto.chosen_piece)
-        value = game.minmax(3, float('-inf'), float('inf'), True)
-        if value > best_value:
-        best_value = value
-        best_move = move
-    return best_move
-
-def make_move(self, x: int, y: int, piece: int) -> None:
-    """Makes the move (x, y) on the board with the given piece."""
-    self.board[x][j] = piece
-    self.pieces.remove(piece)
-    self.current_player *= -1
-
-This function sets the value of the position (x, y) on the board to the given piece, 
-removes the piece from the list of remaining pieces, and flips the current player (since it is now the other player's turn).
-'''
-
 
 def main():
     # print("GA-----------------------------")
