@@ -9,7 +9,6 @@ class QLearningAgent:
         self.epsilon = epsilon
         self.discount = discount
         
-
     def get_qvalue(self, state, action):
         return self._qvalues[state][action]
 
@@ -17,7 +16,7 @@ class QLearningAgent:
         self._qvalues[state][action] = value
 
     def get_value(self, state):
-        possible_actions = self.get_legal_actions(state)
+        possible_actions = self.possible_actions(state)
 
         if not possible_actions:
             return 0.0
