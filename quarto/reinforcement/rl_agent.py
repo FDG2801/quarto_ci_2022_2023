@@ -17,7 +17,7 @@ class QLAgent(Player):
         '''
         if type(state) == 'list' or 'tuple':
             state = np.array(list(list(x) for x in state))
-        [print((x,y)) for x, row in enumerate(state) for y, value in enumerate(row) if value == -1]
+        #[print((x,y)) for x, row in enumerate(state) for y, value in enumerate(row) if value == -1]
         return [((x,y), piece) for x, row in enumerate(state) for y, value in enumerate(row) if value == -1 if self.placeable(state,x,y) ]
     def choose_piece(self) -> int:
         '''
@@ -39,7 +39,7 @@ class QLAgent(Player):
     def placeable(self, state, x: int, y: int) -> bool:
         if type(state) == 'list':
             state = np.array(list(list(x) for x in state))
-        return not (y < 0 or x < 0 or x > 3 or y > 3 or state[y,x] >= 0)
+        return not (y < 0 or x < 0 or x > 3 or y > 3 or state[x,y] >= 0)
     def create_newstate(self, action):
         '''
         Auxiliary function to create a new temporary state.
@@ -62,7 +62,7 @@ class QLAgent(Player):
 
         # last_state, last_action = self.state_history if self.state_history else (state, None)
         possible_actions = self.possible_actions(self.get_board(), piece)
-        print('possible actions: ', possible_actions)
+        #print('possible actions: ', possible_actions)
 
         if not state in self.Q:
             self.Q[state] = Table()
@@ -73,15 +73,14 @@ class QLAgent(Player):
         #if 2 < self.epsilon:
             action = random.choice(list(self.Q[state]))
         else:
-            print('action selection: ', self.Q[state])
+            #print('action selection: ', self.Q[state])
             action = max(self.Q[state], key=self.Q[state].get)
-
         # create new board state with new action
         next_state = self.create_newstate(action)
 
         self.update(state, action, next_state)
 
-        return action[0]
+        return (action[0][1], action[0][0])
 
     def get_qvalue(self, state, action):
         return self.Q[state][action]
@@ -110,7 +109,7 @@ class QLAgent(Player):
         check_winner = super().get_game().check_winner()
 
         if check_winner >= 0:
-            print(f'winner: {check_winner}')
+            #print(f'winner: {check_winner}')
             reward = 1.0 if super().get_game().check_winner() == 1 else -1.0
 
         gamma = self.gamma
