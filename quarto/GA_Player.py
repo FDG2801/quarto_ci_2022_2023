@@ -207,7 +207,7 @@ def evolve() -> dict:
             game.set_players((player0(game, genome0), player1(game)))
 
             winner = game.run()
-            if winner == 0:
+            if winner == 0 or winner == -1:
                 wr += 1
 
         return wr / NO_OF_MATCHES_FITNESS

@@ -155,20 +155,20 @@ class MinMax(quarto.Player):
             return score
 
 def main():
-    # print("GA-----------------------------")
-    # game = quarto.Quarto()
-    # find_genome = evolve()
-
-    # game.set_players((RandomPlayer(game), GA_Player(game, find_genome)))
-    # winner = game.run()
-    # logging.info(f"main: Winner: player {winner}")
-
-    print("MINMAX-----------------------------")
+    print("GA-----------------------------")
     game = quarto.Quarto()
-    
-    game.set_players((RandomPlayer(game), MinMax(game)))
+    #find_genome = evolve()
+    found_genome = {'alpha': 0.1, 'beta': 0.3}
+    game.set_players((RandomPlayer(game), GA_Player(game, found_genome)))
     winner = game.run()
     logging.info(f"main: Winner: player {winner}")
+
+    # print("MINMAX-----------------------------")
+    # game = quarto.Quarto()
+    #
+    # game.set_players((RandomPlayer(game), MinMax(game)))
+    # winner = game.run()
+    # logging.info(f"main: Winner: player {winner}")
 
 
 if __name__ == '__main__':
