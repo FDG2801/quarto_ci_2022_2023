@@ -1,4 +1,5 @@
 import quarto
+import copy
 
 
 class MinMax(quarto.Player):
@@ -12,7 +13,7 @@ class MinMax(quarto.Player):
 
     def choose_piece(self) -> int:
         ''' choose_piece using minmax ??? '''
-        #print("Choosing piece -------------- ")
+        # print("Choosing piece -------------- ")
         # function to chose_piece
         # return random.randint(0, 15)
         # # ------------------------------------------------------
@@ -50,6 +51,19 @@ class MinMax(quarto.Player):
                 # self.modify_board(new_board,piece,best_move)
         return best_move[1], best_move[0]
 
+    def can_beat_one_level(self) -> tuple[bool, tuple]:
+        # Choose a position to place the piece based on a heuristic function
+        current_quarto = self.get_game()
+        score = 0
+        for move in self.possible_moves():
+            quarto_copy = copy.deepcopy(current_quarto)
+            quarto_copy.place(move[0], move[1])
+            score = self.heuristic2(quarto_copy)
+            if score == float('inf'):
+                return True, (move[1], move[0])
+
+        return False, None
+
     # def modify_board(self, board,piece,pos):
     #     print("Modifying board ------")
     #     board[pos[0]][pos[1]] = piece
@@ -58,7 +72,7 @@ class MinMax(quarto.Player):
 
     def piece_available(self, piece) -> bool:
         # Iterate over the board and check if the given piece has already been played
-        #print("Is piece available? -------------- ")
+        # print("Is piece available? -------------- ")
         quarto = self.get_game()
         board = quarto.get_board_status()
         for row in board:
@@ -70,7 +84,7 @@ class MinMax(quarto.Player):
     def heuristic(self):
         # Calculate a score for the given board position and piece
         # Higher values are better
-        #print("checking heuristic -------------- ")
+        # print("checking heuristic -------------- ")
         quarto = self.get_game()
         score = 0
         for move in self.possible_moves():
@@ -82,9 +96,15 @@ class MinMax(quarto.Player):
             score += self.evaluate(new_board)
         return score
 
+    def heuristic2(self, new_quarto: quarto.Quarto):
+        if new_quarto.check_finished():
+            # If the move leads to a win, return a high score
+            return float('inf')
+        return 0
+
     def possible_moves(self):
         # Generate a list of all empty cells on the board
-        #print("possible_moves -------------- ")
+        # print("possible_moves -------------- ")
         quarto = self.get_game()
         board = quarto.get_board_status()
         # print("BOARD in POSSIBLE MOVES: ",board)
@@ -96,7 +116,7 @@ class MinMax(quarto.Player):
         return moves
 
     def game_over(self, board):
-        #print("Checking game status -------------- ")
+        # print("Checking game status -------------- ")
         # Check for a win in rows
         for row in board:
             # print(row,"ROW")
@@ -118,12 +138,12 @@ class MinMax(quarto.Player):
         return False
 
     def all_same(self, items):
-        #print("Checking items -------------- ")
+        # print("Checking items -------------- ")
         # Return True if all items are the same, False otherwise
         return len(set(items)) == 1
 
     def evaluate(self, board):
-        #print("Evaluating -------------- ")
+        # print("Evaluating -------------- ")
         # Calculate a score for the given board position
         # Higher values are better for MAX, lower values are better for MIN
         score = 0
@@ -136,7 +156,7 @@ class MinMax(quarto.Player):
         return score
 
     def evaluate_row(self, row):
-        #print("Evaluating row -------------- ")
+        # print("Evaluating row -------------- ")
         # Calculate a score for the given row
         # Higher values are better for MAX, lower values are better for MIN
         score = 0
