@@ -10,6 +10,7 @@ class QLAgent(Player):
         self.alpha = info['alpha']
         self.gamma = info['gamma']
         self.epsilon = info['epsilon']
+        self.train = info['train']
 
     def possible_actions(self, state, piece) -> list:
         '''
@@ -77,10 +78,10 @@ class QLAgent(Player):
             action = max(self.Q[state], key=self.Q[state].get)
         # create new board state with new action
         next_state = self.create_newstate(action)
+        if self.train:
+            self.update(state, action, next_state)
 
-        self.update(state, action, next_state)
-
-        return (action[0][1], action[0][0])
+        return action[0][1], action[0][0]
 
     def get_qvalue(self, state, action):
         return self.Q[state][action]
