@@ -1,6 +1,6 @@
 import quarto
 import copy
-
+import numpy
 
 class MinMax(quarto.Player):
     """MinMax agent"""
@@ -64,6 +64,30 @@ class MinMax(quarto.Player):
 
         return False, None
 
+    def not_winning_pieces(self, board: numpy.ndarray) -> list:
+        current_quarto = self.get_game()
+        available_pieces = list(set(range(16)) - set(board.ravel()))
+        not_winning_pieces = list()
+        moves = []
+        for i in range(4):
+            for j in range(4):
+                if board[i][j] == -1:
+                    moves.append((i, j))
+        for piece in available_pieces:
+            this_piece_can_win = False
+            for move in moves:
+                quarto_copy: quarto.Quarto = copy.deepcopy(current_quarto)
+                quarto_copy.select(piece)
+                quarto_copy.place(move[0], move[1])
+                score = self.heuristic2(quarto_copy)
+                if score == float('inf'):
+                    this_piece_can_win = True
+                    break
+            if not this_piece_can_win:
+                not_winning_pieces.append(piece)
+
+        return not_winning_pieces
+
     # def modify_board(self, board,piece,pos):
     #     print("Modifying board ------")
     #     board[pos[0]][pos[1]] = piece
@@ -97,7 +121,8 @@ class MinMax(quarto.Player):
         return score
 
     def heuristic2(self, new_quarto: quarto.Quarto):
-        if new_quarto.check_finished():
+        if new_quarto.check_winner() >= 0:
+        #if new_quarto.check_finished():
             # If the move leads to a win, return a high score
             return float('inf')
         return 0

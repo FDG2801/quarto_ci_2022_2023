@@ -7,38 +7,37 @@ from itertools import combinations
 import numpy
 from tqdm import tqdm
 import numpy as np
-import RandomPlayer
-import GA_Player
 import quarto
 import MinMax_Player
+import RandomPlayer
 
 
 def cook_status(game, board: numpy.ndarray) -> dict:
     status = dict()
 
     high_values = [
-        elem for elem in board.ravel() if elem >= 0 and game.get_piece_characteristics(elem).HIGH
+        elem for elem in board.ravel() if elem >= 0 and game.get_piece_charachteristics(elem).HIGH
     ]
     coloured_values = [
-        elem for elem in board.ravel() if elem >= 0 and game.get_piece_characteristics(elem).COLOURED
+        elem for elem in board.ravel() if elem >= 0 and game.get_piece_charachteristics(elem).COLOURED
     ]
     solid_values = [
-        elem for elem in board.ravel() if elem >= 0 and game.get_piece_characteristics(elem).SOLID
+        elem for elem in board.ravel() if elem >= 0 and game.get_piece_charachteristics(elem).SOLID
     ]
     square_values = [
-        elem for elem in board.ravel() if elem >= 0 and game.get_piece_characteristics(elem).SQUARE
+        elem for elem in board.ravel() if elem >= 0 and game.get_piece_charachteristics(elem).SQUARE
     ]
     low_values = [
-        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_characteristics(elem).HIGH
+        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_charachteristics(elem).HIGH
     ]
     noncolor_values = [
-        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_characteristics(elem).COLOURED
+        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_charachteristics(elem).COLOURED
     ]
     hollow_values = [
-        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_characteristics(elem).SOLID
+        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_charachteristics(elem).SOLID
     ]
     circle_values = [
-        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_characteristics(elem).SQUARE
+        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_charachteristics(elem).SQUARE
     ]
 
     elements_per_type = [(len(high_values), 8), (len(coloured_values), 4), (len(solid_values), 2),
@@ -97,28 +96,45 @@ class GA_MinMaxPlayer(quarto.Player):
     def choose_piece(self) -> int:
         game = self.get_game()
         board = game.get_board_status()
-        elements_per_type = cook_status(game, board)["elements_per_type"]
+        status = cook_status(game, board)
+        elements_per_type = status["elements_per_type"]
 
         alpha = self.genome["alpha"]
         elements = 4
+
+        not_winning_pieces = list()
+        rows_high_risk = status["rows_at_risk"][4]
+        columns_high_risk = status["columns_at_risk"][4]
+        diagonals_high_risk = status["diagonals_at_risk"]
+        minmax = MinMax_Player.MinMax(self.get_game())
+
+        if len(diagonals_high_risk) != 0 or len(rows_high_risk) != 0 or len(columns_high_risk) != 0:
+            not_winning_pieces = minmax.not_winning_pieces(board)
+            if len(not_winning_pieces) == 1:
+                return not_winning_pieces[0]
+
         if alpha < random.random():
 
             while True:
                 sorted_combinations = list(
                     combinations(sorted(elements_per_type, key=lambda i: i[0])[:elements], r=4))
+                random.shuffle(sorted_combinations)
                 for combination in sorted_combinations:
                     piece_val = sum([val for e, val in combination])
                     if piece_val not in board:
-                        return piece_val
+                        if len(not_winning_pieces) == 0 or piece_val in not_winning_pieces:
+                            return piece_val
                 elements += 1
         else:
             while True:
                 sorted_combinations = list(
                     combinations(sorted(elements_per_type, key=lambda i: i[0], reverse=True)[:elements], r=4))
+                random.shuffle(sorted_combinations)
                 for combination in sorted_combinations:
                     piece_val = sum([val for e, val in combination])
                     if piece_val not in board:
-                        return piece_val
+                        if len(not_winning_pieces) == 0 or piece_val in not_winning_pieces:
+                            return piece_val
                 elements += 1
 
     def place_piece(self) -> tuple[int, int]:
@@ -208,11 +224,22 @@ def evolve() -> dict:
 
     Individual = namedtuple("Individual", ["genome", "fitness"])
 
-    def play_n_games(player0, player1, genome0, genome1):
+    # def play_n_games(player0, player1, genome0, genome1):
+    #     wr = 0
+    #     for _ in range(NO_OF_MATCHES_FITNESS):
+    #         game = quarto.Quarto()
+    #         game.set_players((player0(game, genome0), player1(game, genome1)))
+    #
+    #         winner = game.run()
+    #         if winner == 0 or winner == -1:
+    #             wr += 1
+    #
+    #     return wr / NO_OF_MATCHES_FITNESS
+    def play_n_games(player0, player1, genome0):
         wr = 0
         for _ in range(NO_OF_MATCHES_FITNESS):
             game = quarto.Quarto()
-            game.set_players((player0(game, genome0), player1(game, genome1)))
+            game.set_players((player0(game, genome0), player1(game)))
 
             winner = game.run()
             if winner == 0 or winner == -1:
@@ -253,14 +280,14 @@ def evolve() -> dict:
         split = random.randint(1, len(genome1keys) - 1)
         for g in genome1keys[:split]:
             if outcome > .5:
-                child[g] = min(genome1[g] + .3, 1)
+                child[g] = min(round(genome1[g] + .3, 1), 1)
             else:
-                child[g] = max(0, genome1[g] - .3)
+                child[g] = max(0, round(genome1[g] - .3, 1))
         for g in genome2keys[split:]:
             if outcome > .5:
-                child[g] = min(genome2[g] + .3, 1)
+                child[g] = min(round(genome2[g] + .3, 1), 1)
             else:
-                child[g] = max(0, genome2[g] - .3)
+                child[g] = max(0, round(genome2[g] - .3, 1))
 
         return child
 
@@ -269,14 +296,15 @@ def evolve() -> dict:
         outcome = random.random()
         gene = random.choice(list(genome.keys()))
         if outcome > .5:
-            child[gene] = min(genome[gene] + .1, 1)
+            child[gene] = min(round(genome[gene] + .1, 1), 1)
         else:
-            child[gene] = max(0, genome[gene] - .1)
+            child[gene] = max(0, round(genome[gene] - .1, 1))
 
         return child
 
     def w(genome):
-        wr = play_n_games(GA_MinMaxPlayer, GA_Player.GA_Player, genome, {'alpha': 0.1, 'beta': 0.3})
+        #wr = play_n_games(GA_MinMaxPlayer, GA_Player.GA_Player, genome, {'alpha': 0.1, 'beta': 0.3})
+        wr = play_n_games(GA_MinMaxPlayer, RandomPlayer.RandomPlayer, genome)
         return wr
 
     def compute_GO_probs(no_of_gens, current_gen, best_fitness, avg_top_five_fitness) -> list[float, float, float]:

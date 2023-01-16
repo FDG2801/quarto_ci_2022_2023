@@ -8,52 +8,78 @@ from GA_MinMaxPlayer import evolve as new_evolve, GA_MinMaxPlayer
 
 
 def main():
-    # print("GA-----------------------------")
-    # game = quarto.Quarto()
-    # # find_genome = evolve()
-    # found_genome = {'alpha': 0.1, 'beta': 0.3}
-    # game.set_players((RandomPlayer(game), GA_Player(game, found_genome)))
-    # winner = game.run()
-    # logging.info(f"main: Winner: player {winner}")
-    #
-    # print("MINMAX-----------------------------")
-    # game = quarto.Quarto()
-    #
-    # game.set_players((RandomPlayer(game), MinMax(game)))
-    # winner = game.run()
-    # logging.info(f"main: Winner: player {winner}")
+    '''
+    print("old GA tuning second player-----------------------------")
+    game = quarto.Quarto()
+    find_genome = evolve()
+    #print(find_genome)
+    found_genome = {'alpha': 0.1, 'beta': 0.2}
+    game.set_players((RandomPlayer(game), GA_Player(game, found_genome)))
+    winner = game.run()
+    logging.info(f"main: Winner: player {winner}")
+
+    print("old GA tuning first player-----------------------------")
+    game = quarto.Quarto()
+    #find_genome = evolve()
+    #print(find_genome)
+    found_genome = {'alpha': 0.1, 'beta': 0.2}
+    game.set_players((GA_Player(game, found_genome), RandomPlayer(game)))
+    winner = game.run()
+    logging.info(f"main: Winner: player {winner}")
+
+
+    print("new GA tuning second player-----------------------------")
+    game = quarto.Quarto()
+    find_genome = new_evolve()
+    print(find_genome)
+    #found_genome = {'alpha': 0.0, 'beta': 0.1}
+    game.set_players((RandomPlayer(game), GA_MinMaxPlayer(game, find_genome)))
+    winner = game.run()
+    logging.info(f"main: Winner: player {winner}")
+
+    print("new GA tuning first player-----------------------------")
+    game = quarto.Quarto()
+    find_genome = new_evolve()
+    print(find_genome)
+    #found_genome = {'alpha': 0.0, 'beta': 0.1}
+    game.set_players((GA_MinMaxPlayer(game, find_genome), RandomPlayer(game)))
+    winner = game.run()
+    logging.info(f"main: Winner: player {winner}")
+    '''
+
+
 
     wr = 0
     dr = 0
-    for _ in range(1000):
+    for _ in range(100):
         game = quarto.Quarto()
         # find_genome = evolve()
-        found_genome = {'alpha': 0.1, 'beta': 0.3}
+        found_genome = {'alpha': 0.1, 'beta': 0.2}
         game.set_players((RandomPlayer(game), GA_Player(game, found_genome)))
         winner = game.run()
         if winner == 0:
             wr += 1
         if winner == -1:
             dr += 1
-    print(f"Random vs oldGA(1000 games): wins: {wr}, draws: {dr}")
+    print(f"Random vs oldGA(100 games): wins: {wr}, draws: {dr}")
 
     wr = 0
     dr = 0
-    for _ in range(1000):
+    for _ in range(100):
         game = quarto.Quarto()
         # find_genome = evolve()
-        found_genome = {'alpha': 0.1, 'beta': 0.3}
+        found_genome = {'alpha': 0.1, 'beta': 0.2}
         game.set_players((GA_Player(game, found_genome), RandomPlayer(game)))
         winner = game.run()
         if winner == 0:
             wr += 1
         if winner == -1:
             dr += 1
-    print(f"oldGA vs Random(1000 games): wins: {wr}, draws: {dr}")
+    print(f"oldGA vs Random(100 games): wins: {wr}, draws: {dr}")
 
     wr = 0
     dr = 0
-    for _ in range(1000):
+    for _ in range(100):
         game = quarto.Quarto()
         # find_genome = evolve()
         found_genome = {'alpha': 0.1, 'beta': 0.3}
@@ -63,11 +89,11 @@ def main():
             wr += 1
         if winner == -1:
             dr += 1
-    print(f"Random vs newGA(1000 games): wins: {wr}, draws: {dr}")
+    print(f"Random vs newGA(100 games): wins: {wr}, draws: {dr}")
 
     wr = 0
     dr = 0
-    for _ in range(1000):
+    for _ in range(100):
         game = quarto.Quarto()
         # find_genome = evolve()
         found_genome = {'alpha': 0.1, 'beta': 0.3}
@@ -77,37 +103,38 @@ def main():
             wr += 1
         if winner == -1:
             dr += 1
-    print(f"newGA vs Random(1000 games): wins: {wr}, draws: {dr}")
+    print(f"newGA vs Random(100 games): wins: {wr}, draws: {dr}")
 
     wr = 0
     dr = 0
-    for _ in range(1000):
+    for _ in range(100):
         game = quarto.Quarto()
         # find_genome = evolve()
-        found_genome = {'alpha': 0.1, 'beta': 0.3}
-        game.set_players((GA_MinMaxPlayer(game, found_genome), GA_Player(game, found_genome)))
-        winner = game.run()
-        if winner == 0:
-            wr += 1
-        if winner == -1:
-            dr += 1
-    print(f"old GA vs new GA(1000 games): wins: {wr}, draws: {dr}")
-
-    wr = 0
-    dr = 0
-    for _ in range(1000):
-        game = quarto.Quarto()
-        # find_genome = new_evolve()
-        found_genome0 = {'alpha': 0.1, 'beta': 0.8}
+        found_genome0 = {'alpha': 0.0, 'beta': 0.1}
         found_genome1 = {'alpha': 0.1, 'beta': 0.2}
-
         game.set_players((GA_MinMaxPlayer(game, found_genome0), GA_Player(game, found_genome1)))
         winner = game.run()
         if winner == 0:
             wr += 1
         if winner == -1:
             dr += 1
-    print(f"new GA vs old GA(1000 games): wins: {wr}, draws: {dr}")
+    print(f"new GA vs old GA(100 games): wins: {wr}, draws: {dr}")
+
+    wr = 0
+    dr = 0
+    for _ in range(100):
+        game = quarto.Quarto()
+        # find_genome = new_evolve()
+        found_genome0 = {'alpha': 0.1, 'beta': 0.2}
+        found_genome1 = {'alpha': 0.1, 'beta': 0.2}
+
+        game.set_players((GA_Player(game, found_genome0), GA_MinMaxPlayer(game, found_genome1)))
+        winner = game.run()
+        if winner == 0:
+            wr += 1
+        if winner == -1:
+            dr += 1
+    print(f"old GA vs new GA(100 games): wins: {wr}, draws: {dr}")
 
 
 if __name__ == '__main__':
@@ -127,5 +154,4 @@ if __name__ == '__main__':
         logging.getLogger().setLevel(level=logging.INFO)
     elif args.verbose == 2:
         logging.getLogger().setLevel(level=logging.DEBUG)
-
     main()

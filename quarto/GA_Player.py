@@ -15,28 +15,28 @@ def cook_status(game, board: numpy.ndarray) -> dict:
     status = dict()
 
     high_values = [
-        elem for elem in board.ravel() if elem >= 0 and game.get_piece_characteristics(elem).HIGH
+        elem for elem in board.ravel() if elem >= 0 and game.get_piece_charachteristics(elem).HIGH
     ]
     coloured_values = [
-        elem for elem in board.ravel() if elem >= 0 and game.get_piece_characteristics(elem).COLOURED
+        elem for elem in board.ravel() if elem >= 0 and game.get_piece_charachteristics(elem).COLOURED
     ]
     solid_values = [
-        elem for elem in board.ravel() if elem >= 0 and game.get_piece_characteristics(elem).SOLID
+        elem for elem in board.ravel() if elem >= 0 and game.get_piece_charachteristics(elem).SOLID
     ]
     square_values = [
-        elem for elem in board.ravel() if elem >= 0 and game.get_piece_characteristics(elem).SQUARE
+        elem for elem in board.ravel() if elem >= 0 and game.get_piece_charachteristics(elem).SQUARE
     ]
     low_values = [
-        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_characteristics(elem).HIGH
+        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_charachteristics(elem).HIGH
     ]
     noncolor_values = [
-        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_characteristics(elem).COLOURED
+        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_charachteristics(elem).COLOURED
     ]
     hollow_values = [
-        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_characteristics(elem).SOLID
+        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_charachteristics(elem).SOLID
     ]
     circle_values = [
-        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_characteristics(elem).SQUARE
+        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_charachteristics(elem).SQUARE
     ]
 
     elements_per_type = [(len(high_values), 8), (len(coloured_values), 4), (len(solid_values), 2),
@@ -245,14 +245,14 @@ def evolve() -> dict:
         split = random.randint(1, len(genome1keys) - 1)
         for g in genome1keys[:split]:
             if outcome > .5:
-                child[g] = min(genome1[g] + .3, 1)
+                child[g] = min(round(genome1[g] + .3, 1), 1)
             else:
-                child[g] = max(0, genome1[g] - .3)
+                child[g] = max(0, round(genome1[g] - .3, 1))
         for g in genome2keys[split:]:
             if outcome > .5:
-                child[g] = min(genome2[g] + .3, 1)
+                child[g] = min(round(genome2[g] + .3, 1), 1)
             else:
-                child[g] = max(0, genome2[g] - .3)
+                child[g] = max(0, round(genome2[g] - .3, 1))
 
         return child
 
@@ -261,9 +261,9 @@ def evolve() -> dict:
         outcome = random.random()
         gene = random.choice(list(genome.keys()))
         if outcome > .5:
-            child[gene] = min(genome[gene] + .1, 1)
+            child[gene] = min(round(genome[gene] + .1, 1), 1)
         else:
-            child[gene] = max(0, genome[gene] - .1)
+            child[gene] = max(0, round(genome[gene] - .1, 1))
 
         return child
 
