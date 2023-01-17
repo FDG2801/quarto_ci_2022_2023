@@ -1,9 +1,84 @@
+from itertools import combinations
+
 from .Memory import RememberOrig
+from .. import MinMax_Player
 from ..quarto.objects import Player
 import random
 from .tables import Table
 import numpy as np
 import copy
+
+
+def cook_status(game, board: np.ndarray) -> dict:
+    status = dict()
+
+    high_values = [
+        elem for elem in board.ravel() if elem >= 0 and game.get_piece_charachteristics(elem).HIGH
+    ]
+    coloured_values = [
+        elem for elem in board.ravel() if elem >= 0 and game.get_piece_charachteristics(elem).COLOURED
+    ]
+    solid_values = [
+        elem for elem in board.ravel() if elem >= 0 and game.get_piece_charachteristics(elem).SOLID
+    ]
+    square_values = [
+        elem for elem in board.ravel() if elem >= 0 and game.get_piece_charachteristics(elem).SQUARE
+    ]
+    low_values = [
+        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_charachteristics(elem).HIGH
+    ]
+    noncolor_values = [
+        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_charachteristics(elem).COLOURED
+    ]
+    hollow_values = [
+        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_charachteristics(elem).SOLID
+    ]
+    circle_values = [
+        elem for elem in board.ravel() if elem >= 0 and not game.get_piece_charachteristics(elem).SQUARE
+    ]
+
+    elements_per_type = [(len(high_values), 8), (len(coloured_values), 4), (len(solid_values), 2),
+                         (len(square_values), 1),
+                         (len(low_values), 0), (len(noncolor_values), 0), (len(hollow_values), 0),
+                         (len(circle_values), 0)]
+
+    rows_at_risk = list()
+    columns_at_risk = list()
+    diagonals_at_risk = list()
+    for i in range(5):
+        rows_at_risk.append(list())
+        columns_at_risk.append(list())
+
+    # 0 empty cells -> risk is 0
+    # 1 empty cells -> risk is 4
+    # 2 empty cells -> risk is 3
+    # 3 empty cells -> risk is 2
+    # 4 empty cells -> risk is 1
+    for i in range(4):
+        rows_at_risk[abs(list(board[i]).count(-1) - 5) % 5].append(i)
+        columns_at_risk[abs(list(np.array(board).T[i]).count(-1) - 5) % 5].append(i)
+
+    holes_count_main = 0
+    holes_count_secondary = 0
+    for i in range(4):
+        if board[i][i] == -1:
+            holes_count_main += 1
+        if board[i][4 - i - 1] == -1:
+            holes_count_secondary += 1
+
+    if holes_count_main == 1:
+        diagonals_at_risk.append(1)  # at this point the main diagonal is at risk
+    if holes_count_secondary == 1:
+        diagonals_at_risk.append(2)  # at this point the secondary diagonal is at risk
+
+    status["elements_per_type"] = elements_per_type
+    status["rows_at_risk"] = rows_at_risk
+    status["columns_at_risk"] = columns_at_risk
+    status["diagonals_at_risk"] = diagonals_at_risk
+
+    return status
+
+
 class QLAgent(Player):
     def __init__(self, quarto, info):
         super().__init__(quarto)
@@ -18,6 +93,7 @@ class QLAgent(Player):
     def set_game(self, quarto):
         super().__init__(quarto)
         self.state_history = ()
+
     def possible_actions(self, state, piece) -> list:
         '''
         Retrieves all possible position coupled with the selected piece.
@@ -26,16 +102,50 @@ class QLAgent(Player):
             state = np.array(list(list(x) for x in state))
         return [((x, y), piece) for x, row in enumerate(state) for y, value in enumerate(row)
                 if value == -1 if self.placeable(state, x, y)]
-    def choose_piece(self) -> int:
-        '''
-        at the moment it uses the same strategy as random to retrieve
-        a piece to be placed by the counterpart.
-        To be implemented better.
 
-        Possible idea is to retrieve the piece which minimizes the Q-table score,
-        or to create a new Q-table.
-        '''
-        return random.randint(0, 15)
+    def choose_piece(self) -> int:
+        game = self.get_game()
+        board = game.get_board_status()
+        status = cook_status(game, board)
+        elements_per_type = status["elements_per_type"]
+
+        alpha = self.genome["alpha"]
+        elements = 4
+
+        not_winning_pieces = list()
+        rows_high_risk = status["rows_at_risk"][4]
+        columns_high_risk = status["columns_at_risk"][4]
+        diagonals_high_risk = status["diagonals_at_risk"]
+        minmax = MinMax_Player.MinMax(self.get_game())
+
+        if len(diagonals_high_risk) != 0 or len(rows_high_risk) != 0 or len(columns_high_risk) != 0:
+            not_winning_pieces = minmax.not_winning_pieces(board)
+            if len(not_winning_pieces) == 1:
+                return not_winning_pieces[0]
+
+        if alpha < random.random():
+
+            while True:
+                sorted_combinations = list(
+                    combinations(sorted(elements_per_type, key=lambda i: i[0])[:elements], r=4))
+                random.shuffle(sorted_combinations)
+                for combination in sorted_combinations:
+                    piece_val = sum([val for e, val in combination])
+                    if piece_val not in board:
+                        if len(not_winning_pieces) == 0 or piece_val in not_winning_pieces:
+                            return piece_val
+                elements += 1
+        else:
+            while True:
+                sorted_combinations = list(
+                    combinations(sorted(elements_per_type, key=lambda i: i[0], reverse=True)[:elements], r=4))
+                random.shuffle(sorted_combinations)
+                for combination in sorted_combinations:
+                    piece_val = sum([val for e, val in combination])
+                    if piece_val not in board:
+                        if len(not_winning_pieces) == 0 or piece_val in not_winning_pieces:
+                            return piece_val
+                elements += 1
 
     def get_board(self, type='list'):
         if type == 'tuple':
@@ -46,8 +156,7 @@ class QLAgent(Player):
     def placeable(self, state, x: int, y: int) -> bool:
         if type(state) == 'list':
             state = np.array(list(list(x) for x in state))
-        return not (y < 0 or x < 0 or x > 3 or y > 3 or state[x,y] >= 0)
-
+        return not (y < 0 or x < 0 or x > 3 or y > 3 or state[x, y] >= 0)
 
     def place_piece(self) -> tuple[int, int]:
         '''
@@ -58,11 +167,10 @@ class QLAgent(Player):
             action = self.q_move()
 
             self.q_post()
-            #print('======= ACTION ========')
+            # print('======= ACTION ========')
             return action[0][1], action[0][0]
         else:
             return self.get_value()
-
 
     def q_move(self) -> tuple[int, int]:
         state = self.get_board(type='tuple')
@@ -84,14 +192,14 @@ class QLAgent(Player):
         if random.random() < self.epsilon:
             action = random.choice(list(legal_qtable))
         else:
-            #action = max(self.Q[state], key=self.Q[state].get)
+            # action = max(self.Q[state], key=self.Q[state].get)
             action = max(legal_qtable, key=legal_qtable.get)
 
         if not last_action is None:
             r = 0.0
             self.Q[last_state][last_action] += self.alpha * (
-                r + self.gamma * max([self.Q[state][a] for a in self.Q[state]]) -
-                self.Q[last_state][last_action]
+                    r + self.gamma * max([self.Q[state][a] for a in self.Q[state]]) -
+                    self.Q[last_state][last_action]
             )
 
         self.state_history = (state, action)
@@ -120,5 +228,5 @@ class QLAgent(Player):
         old_q = self.get_qvalue(last_state, last_action)'''
         if not action is None:
             self.Q[state][action] += self.alpha * (
-                reward - self.Q[state][action]
+                    reward - self.Q[state][action]
             )

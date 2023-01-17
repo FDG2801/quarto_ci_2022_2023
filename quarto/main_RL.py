@@ -5,20 +5,27 @@ import itertools
 import logging
 import argparse
 import random
+
+from quarto.GA_MinMaxPlayer import GA_MinMaxPlayer
 from .quarto.objects import Player, Quarto
 from .reinforcement.rl_agent import QLAgent
 from .reinforcement.Memory import Save
 import matplotlib.pyplot as plt
+
+
 class RandomPlayer(Player):
     """Random player"""
 
     def __init__(self, game: Quarto) -> None:
         super().__init__(game)
-    #choose piece -> int
+
+    # choose piece -> int
     def choose_piece(self) -> int:
         return random.randint(0, 15)
+
     def place_piece(self) -> tuple[int, int]:
         return random.randint(0, 3), random.randint(0, 3)
+
 
 def train(info, train_iterations: int):
     max_wr = (0, -1)
@@ -29,7 +36,7 @@ def train(info, train_iterations: int):
     path = info['Q_path']
 
     agent = QLAgent(game, info)
-    game.set_players((RandomPlayer(game), agent))
+    game.set_players((GA_MinMaxPlayer(game, {'alpha': 0.1, 'beta': 0.3}), agent))
 
     for m in range(train_iterations):
         winner = game.run()
@@ -47,7 +54,7 @@ def train(info, train_iterations: int):
                 max_wr = (winrate, m)
         game = Quarto()
         agent.set_game(game)
-        game.set_players((RandomPlayer(game), agent))
+        game.set_players((GA_MinMaxPlayer(game, {'alpha': 0.1, 'beta': 0.3}), agent))
 
     Save(agent.Q, path)
     logging.warning(f'max winrate: {max_wr}')
@@ -56,16 +63,16 @@ def train(info, train_iterations: int):
     plt.ylim(0, 100)
     plt.plot(indices, move_history, "b")
     plt.show()
+
+
 def main():
     info = {
-        'alpha': 0.3,   # learning rate
-        'gamma': 0.9,   # memory
-        'epsilon': 0.2, # chance of making a random move
+        'alpha': 0.3,  # learning rate
+        'gamma': 0.9,  # memory
+        'epsilon': 0.2,  # chance of making a random move
         'train': True,
-        'Q_path': './quarto/reinforcement/Q_data.dat'
+        'Q_path': './quarto/reinforcement/Q_data2.dat'
     }
-
-
 
     train(info, 10000)
     #
@@ -75,7 +82,8 @@ def main():
     game.set_players((RandomPlayer(game), agent))
     winner = game.run()
     '''
-    #logging.warning(f"main: Winner: player {winner}")
+    # logging.warning(f"main: Winner: player {winner}")
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

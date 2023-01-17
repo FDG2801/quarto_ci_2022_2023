@@ -51,7 +51,7 @@ def main():
 
     wr = 0
     dr = 0
-    for _ in range(100):
+    for _ in range(1000):
         game = quarto.Quarto()
         # find_genome = evolve()
         found_genome = {'alpha': 0.1, 'beta': 0.2}
@@ -61,11 +61,11 @@ def main():
             wr += 1
         if winner == -1:
             dr += 1
-    print(f"Random vs oldGA(100 games): wins: {wr}, draws: {dr}")
+    print(f"Random vs oldGA(1000 games): wins: {wr}, draws: {dr}")
 
     wr = 0
     dr = 0
-    for _ in range(100):
+    for _ in range(1000):
         game = quarto.Quarto()
         # find_genome = evolve()
         found_genome = {'alpha': 0.1, 'beta': 0.2}
@@ -75,11 +75,11 @@ def main():
             wr += 1
         if winner == -1:
             dr += 1
-    print(f"oldGA vs Random(100 games): wins: {wr}, draws: {dr}")
+    print(f"oldGA vs Random(1000 games): wins: {wr}, draws: {dr}")
 
     wr = 0
     dr = 0
-    for _ in range(100):
+    for _ in range(1000):
         game = quarto.Quarto()
         # find_genome = evolve()
         found_genome = {'alpha': 0.1, 'beta': 0.3}
@@ -89,11 +89,11 @@ def main():
             wr += 1
         if winner == -1:
             dr += 1
-    print(f"Random vs newGA(100 games): wins: {wr}, draws: {dr}")
+    print(f"Random vs newGA(1000 games): wins: {wr}, draws: {dr}")
 
     wr = 0
     dr = 0
-    for _ in range(100):
+    for _ in range(1000):
         game = quarto.Quarto()
         # find_genome = evolve()
         found_genome = {'alpha': 0.1, 'beta': 0.3}
@@ -103,11 +103,11 @@ def main():
             wr += 1
         if winner == -1:
             dr += 1
-    print(f"newGA vs Random(100 games): wins: {wr}, draws: {dr}")
+    print(f"newGA vs Random(1000 games): wins: {wr}, draws: {dr}")
 
     wr = 0
     dr = 0
-    for _ in range(100):
+    for _ in range(1000):
         game = quarto.Quarto()
         # find_genome = evolve()
         found_genome0 = {'alpha': 0.0, 'beta': 0.1}
@@ -118,11 +118,11 @@ def main():
             wr += 1
         if winner == -1:
             dr += 1
-    print(f"new GA vs old GA(100 games): wins: {wr}, draws: {dr}")
+    print(f"new GA vs old GA(1000 games): wins: {wr}, draws: {dr}")
 
     wr = 0
     dr = 0
-    for _ in range(100):
+    for _ in range(1000):
         game = quarto.Quarto()
         # find_genome = new_evolve()
         found_genome0 = {'alpha': 0.1, 'beta': 0.2}
@@ -134,7 +134,7 @@ def main():
             wr += 1
         if winner == -1:
             dr += 1
-    print(f"old GA vs new GA(100 games): wins: {wr}, draws: {dr}")
+    print(f"old GA vs new GA(1000 games): wins: {wr}, draws: {dr}")
 
 
 if __name__ == '__main__':
