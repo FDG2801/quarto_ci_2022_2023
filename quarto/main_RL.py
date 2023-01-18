@@ -6,10 +6,10 @@ import logging
 import argparse
 import random
 
-from quarto.GA_MinMaxPlayer import GA_MinMaxPlayer
-from .quarto.objects import Player, Quarto
-from .reinforcement.rl_agent import QLAgent
-from .reinforcement.Memory import Save
+from GA_MinMaxPlayer import GA_MinMaxPlayer
+from quarto.objects import Player, Quarto
+from reinforcement.rl_agent import QLAgent
+from reinforcement.Memory import Save
 import matplotlib.pyplot as plt
 
 
@@ -27,7 +27,7 @@ class RandomPlayer(Player):
         return random.randint(0, 3), random.randint(0, 3)
 
 
-def train(info, train_iterations: int):
+def train(info, genome, train_iterations: int):
     max_wr = (0, -1)
     move_history = []
     indices = []
@@ -35,7 +35,7 @@ def train(info, train_iterations: int):
     game = Quarto()
     path = info['Q_path']
 
-    agent = QLAgent(game, info)
+    agent = QLAgent(game, info, genome)
     game.set_players((GA_MinMaxPlayer(game, {'alpha': 0.1, 'beta': 0.3}), agent))
 
     for m in range(train_iterations):
@@ -71,10 +71,10 @@ def main():
         'gamma': 0.9,  # memory
         'epsilon': 0.2,  # chance of making a random move
         'train': True,
-        'Q_path': './quarto/reinforcement/Q_data2.dat'
+        'Q_path': './reinforcement/Q_data2.dat'
     }
-
-    train(info, 10000)
+    genome = {'alpha': 0.1, 'beta': 0.3}
+    train(info, genome, 10000)
     #
     '''
     game = Quarto()

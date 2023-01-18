@@ -1,3 +1,4 @@
-from .Memory import *
-from .tables import *
-from .rl_agent import *
+from reinforcement.Memory import *
+from reinforcement.tables import *
+from reinforcement.rl_agent import *
+from reinforcement.utils import *
