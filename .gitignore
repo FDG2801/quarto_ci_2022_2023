@@ -1,3 +1,4 @@
 *.pyc
 .venv
 .idea
+quarto/__pycache__

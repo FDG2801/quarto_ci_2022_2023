@@ -5,7 +5,7 @@ from GA_Player import evolve, GA_Player
 from RandomPlayer import RandomPlayer
 from MinMax_Player import MinMax
 from GA_MinMaxPlayer import evolve as new_evolve, GA_MinMaxPlayer
-
+from tqdm import tqdm
 
 def main():
     '''
@@ -51,7 +51,7 @@ def main():
 
     wr = 0
     dr = 0
-    for _ in range(1000):
+    for _ in tqdm(range(1000)):
         game = quarto.Quarto()
         # find_genome = evolve()
         found_genome = {'alpha': 0.1, 'beta': 0.2}
@@ -65,7 +65,7 @@ def main():
 
     wr = 0
     dr = 0
-    for _ in range(1000):
+    for _ in tqdm(range(1000)):
         game = quarto.Quarto()
         # find_genome = evolve()
         found_genome = {'alpha': 0.1, 'beta': 0.2}
@@ -79,7 +79,7 @@ def main():
 
     wr = 0
     dr = 0
-    for _ in range(1000):
+    for _ in tqdm(range(1000)):
         game = quarto.Quarto()
         # find_genome = evolve()
         found_genome = {'alpha': 0.1, 'beta': 0.3}
@@ -93,7 +93,7 @@ def main():
 
     wr = 0
     dr = 0
-    for _ in range(1000):
+    for _ in tqdm(range(1000)):
         game = quarto.Quarto()
         # find_genome = evolve()
         found_genome = {'alpha': 0.1, 'beta': 0.3}
@@ -107,7 +107,7 @@ def main():
 
     wr = 0
     dr = 0
-    for _ in range(1000):
+    for _ in tqdm(range(1000)):
         game = quarto.Quarto()
         # find_genome = evolve()
         found_genome0 = {'alpha': 0.0, 'beta': 0.1}
@@ -122,7 +122,7 @@ def main():
 
     wr = 0
     dr = 0
-    for _ in range(1000):
+    for _ in tqdm(range(1000)):
         game = quarto.Quarto()
         # find_genome = new_evolve()
         found_genome0 = {'alpha': 0.1, 'beta': 0.2}
