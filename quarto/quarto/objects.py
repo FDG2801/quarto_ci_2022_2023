@@ -90,6 +90,7 @@ class Quarto(object):
         Place piece in coordinates (x, y). Returns true on success
         '''
         if self.__placeable(x, y):
+            #print(f'Piazzando in: {x,y}')
             self._board[y, x] = self.__selected_piece_index
             self.__binary_board[y,
                                 x][:] = self.__pieces[self.__selected_piece_index].binary
@@ -190,6 +191,7 @@ class Quarto(object):
             self._current_player = (
                 self._current_player + 1) % self.MAX_PLAYERS
             #self.print()
+            #print(f'Current player: {self._current_player}')
             while not piece_ok:
                 x, y = self.__players[self._current_player].place_piece()
                 piece_ok = self.place(x, y)

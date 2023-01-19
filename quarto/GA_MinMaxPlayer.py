@@ -74,10 +74,14 @@ def cook_status(game, board: numpy.ndarray) -> dict:
     if holes_count_secondary == 1:
         diagonals_at_risk.append(2)  # at this point the secondary diagonal is at risk
 
+    holes = 0
+    for i in range(4):
+        holes += list(board[i]).count(-1)
     status["elements_per_type"] = elements_per_type
     status["rows_at_risk"] = rows_at_risk
     status["columns_at_risk"] = columns_at_risk
     status["diagonals_at_risk"] = diagonals_at_risk
+    status["holes"] = holes
 
     return status
 
@@ -148,10 +152,11 @@ class GA_MinMaxPlayer(quarto.Player):
         diagonals_high_risk = status["diagonals_at_risk"]
         minmax = MinMax_Player.MinMax(self.get_game())
 
-        if len(diagonals_high_risk) != 0 or len(rows_high_risk) != 0 or len(columns_high_risk) != 0:
-            can_beat_move = minmax.can_beat_one_level()
-            if can_beat_move[0]:
-                return can_beat_move[1]
+        if (len(diagonals_high_risk) != 0 or len(rows_high_risk) != 0 or len(columns_high_risk) != 0) and status["holes"] < 8:
+            can_beat_move = minmax.place_piece()
+            #print(can_beat_move)
+            if can_beat_move is not None:
+                return can_beat_move
 
         if len(diagonals_high_risk) != 0:
             diagonal = random.choice(diagonals_high_risk)  # 1 or 2

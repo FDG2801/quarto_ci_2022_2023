@@ -1,6 +1,24 @@
 import quarto
 import copy
 import numpy
+from minimax import minmax
+
+class QuartoMinMax(quarto.Quarto):
+    def __init__(self) -> None:
+        '''
+        This is an upgraded quarto class used by minmax to avoid creating multiple objects, what it does is saving the second-to-last move
+        and restore the board after every move, this is done because minmax is recursive.
+
+        So we introduce:
+        _last_board
+        _last_choosen_piece
+        '''
+        super().__init__()
+        self._last_choosen_piece = 0
+        self._last_board = 0
+        
+        
+    
 
 class MinMax(quarto.Player):
     """MinMax agent"""
@@ -33,23 +51,36 @@ class MinMax(quarto.Player):
     def place_piece(self) -> tuple[int, int]:
         '''place_piece using minmax ??? '''
         #print("Placing piece -------------- ")
-        # return minimax_function(self.get_game(), 5, False)  # problem here
-        # return random.randint(0, 3), random.randint(0, 3)
-        # -------------------------------------------------------------------
+        game = self.get_game()
+        game_test = QuartoMinMax()
+        game_test._board = game._board
+        game_test._current_player = game._current_player
+        index = int(game.get_selected_piece())
+        game_test.__selected_piece_index = index
+        game_test._last_choosen_piece = index
+        game_test._last_board = game._board
+        move = minmax(game_test, 3)
+        #print(move)
+        return move  # problem here
+        
+        #return random.randint(0, 3), random.randint(0, 3)
+        
+
         # Choose a position to place the piece based on a heuristic function
-        quarto = self.get_game()
-        best_score = -float('inf')
-        best_move = None
-        for move in self.possible_moves():
-            new_board = quarto.get_board_status()
-            score = self.heuristic()
-            if score > best_score:
-                best_score = score
-                best_move = move
-                # print("Best move: ",best_move)
-                # piece=self.choose_piece()
-                # self.modify_board(new_board,piece,best_move)
-        return best_move[1], best_move[0]
+        # quarto = self.get_game()
+        #best_score = -float('inf')
+        #best_move = None
+        #for move in self.possible_moves():
+        #    new_board = quarto.get_board_status()
+        #    score = self.heuristic()
+        #    if score > best_score:
+        #        best_score = score
+        #        best_move = move
+        #        # print("Best move: ",best_move)
+        #        # piece=self.choose_piece()
+        #        # self.modify_board(new_board,piece,best_move)
+        #return best_move[1], best_move[0]
+        # ---------------------------------------------------------
 
     def can_beat_one_level(self) -> tuple[bool, tuple]:
         # Choose a position to place the piece based on a heuristic function
@@ -57,6 +88,7 @@ class MinMax(quarto.Player):
         score = 0
         for move in self.possible_moves():
             quarto_copy = copy.deepcopy(current_quarto)
+
             quarto_copy.place(move[0], move[1])
             score = self.heuristic2(quarto_copy)
             if score == float('inf'):

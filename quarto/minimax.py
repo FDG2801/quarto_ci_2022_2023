@@ -1,8 +1,8 @@
 from copy import deepcopy
-from main import MinMax
+import random
 
 EVAL_TIE = 0  # this draw value only matters in the endgame, where the heuristic doesn't matter anymore
-EVAL_WIN = 9
+EVAL_WIN = float('inf')
 MAX_DEPTH = 4
 
 '''
@@ -85,10 +85,12 @@ def minimax_function(game, depth, maximizingPlayer, chosenPiece=None, alpha=-flo
     if maximizingPlayer:
         bestValue = -float('inf')
         for move in get_all_possible_moves(game):
+            game_t = deepcopy(game)
+            piece = choose_piece(game_t)
             game.place(move[0], move[1])
             #choose_piece (move) is now_choose_piece
-            result = minimax_function(game, depth - 1, False, MinMax.choose_piece(), alpha, beta)
-            #game.undo_last_move()
+            result = minimax_function(game_t, depth - 1, False, piece , alpha, beta)
+            #undo_last_move(game_t)
             bestValue = max(bestValue, result)
             alpha = max(alpha, bestValue)
             if beta <= alpha:
@@ -97,9 +99,11 @@ def minimax_function(game, depth, maximizingPlayer, chosenPiece=None, alpha=-flo
     else:
         bestValue = float('inf')
         for move in get_all_possible_moves(game):
-            game.place(move[0], move[1])
+            game_t = deepcopy(game)
+            piece = choose_piece(game_t)
+            game_t.place(move[0], move[1])
             #choose_piece (move) is now_choose_piece
-            result = minimax_function(game, depth - 1, True, MinMax.choose_piece(), alpha, beta)
+            result = minimax_function(game_t, depth - 1, True, piece , alpha, beta)
             #game.undo_last_move()
             bestValue = min(bestValue, result)
             beta = min(beta, bestValue)
@@ -107,9 +111,26 @@ def minimax_function(game, depth, maximizingPlayer, chosenPiece=None, alpha=-flo
                 break
         return bestValue
 
-    # def undo_last_move(game):
-    #     game.__board = game.__last_board
-    #     game.__selected_piece_index = game.__last_choosen_piece
+def minmax(game, depth):
+    scored_moves = []
+    for move in get_all_possible_moves(game):
+        game_t = deepcopy(game)
+        game_t.place(move[0], move[1])
+        scored_moves.append((move, minimax_function(game_t, depth, False)))
+    scored_moves.sort(key=lambda x: x[1], reverse=True)
+    #print(scored_moves)
+    return scored_moves[0][0] if scored_moves[0][1] != float('-inf') else None
+    
+
+def choose_piece(game):
+    piece_ok = False
+    while not piece_ok:
+        piece_ok = game.select(random.randint(0,15))
+    return True
+
+def undo_last_move(game):
+    game._board = game._last_board
+    game.__selected_piece_index = game._last_choosen_piece
 
 
 # Adapted
@@ -135,7 +156,7 @@ def get_all_possible_moves(game_state):
     '''
     for i in range(4):
         for j in range(4):
-            if board[i][j] == -1:
+            if board[j][i] == -1:
                 list.append((i, j))
     return list
 
@@ -157,8 +178,7 @@ def state_eval(game_state):
     '''
     Computes the evaluation of the state of the game
     '''
-    game = game_state.get_game()
-    if game.check_winner():
+    if game_state.check_winner():
         return EVAL_WIN
     # is there the possibility for a tie?
     # elif game_state[0].is_full():
