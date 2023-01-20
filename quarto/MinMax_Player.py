@@ -57,7 +57,7 @@ class MinMax(quarto.Player):
         score = 0
         for move in self.possible_moves():
             quarto_copy = copy.deepcopy(current_quarto)
-            quarto_copy.place(move[0], move[1])
+            quarto_copy.place(move[1], move[0])
             score = self.heuristic2(quarto_copy)
             if score == float('inf'):
                 return True, (move[1], move[0])
@@ -78,7 +78,7 @@ class MinMax(quarto.Player):
             for move in moves:
                 quarto_copy: quarto.Quarto = copy.deepcopy(current_quarto)
                 quarto_copy.select(piece)
-                quarto_copy.place(move[0], move[1])
+                quarto_copy.place(move[1], move[0])
                 score = self.heuristic2(quarto_copy)
                 if score == float('inf'):
                     this_piece_can_win = True
