@@ -2,7 +2,7 @@ from copy import deepcopy
 import random
 
 EVAL_TIE = 0  # this draw value only matters in the endgame, where the heuristic doesn't matter anymore
-EVAL_WIN = float('inf')
+EVAL_WIN = 1 
 MAX_DEPTH = 4
 
 '''
@@ -88,9 +88,7 @@ def minimax_function(game, depth, maximizingPlayer, chosenPiece=None, alpha=-flo
             game_t = deepcopy(game)
             piece = choose_piece(game_t)
             game.place(move[0], move[1])
-            #choose_piece (move) is now_choose_piece
             result = minimax_function(game_t, depth - 1, False, piece , alpha, beta)
-            #undo_last_move(game_t)
             bestValue = max(bestValue, result)
             alpha = max(alpha, bestValue)
             if beta <= alpha:
@@ -102,9 +100,7 @@ def minimax_function(game, depth, maximizingPlayer, chosenPiece=None, alpha=-flo
             game_t = deepcopy(game)
             piece = choose_piece(game_t)
             game_t.place(move[0], move[1])
-            #choose_piece (move) is now_choose_piece
             result = minimax_function(game_t, depth - 1, True, piece , alpha, beta)
-            #game.undo_last_move()
             bestValue = min(bestValue, result)
             beta = min(beta, bestValue)
             if beta <= alpha:
@@ -156,8 +152,8 @@ def get_all_possible_moves(game_state):
     '''
     for i in range(4):
         for j in range(4):
-            if board[j][i] == -1:
-                list.append((i, j))
+            if board[i][j] == -1:
+                list.append((j, i))
     return list
 
 # new
@@ -178,7 +174,7 @@ def state_eval(game_state):
     '''
     Computes the evaluation of the state of the game
     '''
-    if game_state.check_winner():
+    if game_state.check_winner() != -1:
         return EVAL_WIN
     # is there the possibility for a tie?
     # elif game_state[0].is_full():

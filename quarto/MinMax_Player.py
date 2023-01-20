@@ -59,7 +59,7 @@ class MinMax(quarto.Player):
         game_test.__selected_piece_index = index
         game_test._last_choosen_piece = index
         game_test._last_board = game._board
-        move = minmax(game_test, 3)
+        move = minmax(game, 1)
         #print(move)
         return move  # problem here
         
@@ -169,7 +169,7 @@ class MinMax(quarto.Player):
         for i in range(4):
             for j in range(4):
                 if board[i][j] == -1:
-                    moves.append((i, j))
+                    moves.append((j, i))
         return moves
 
     def game_over(self, board):

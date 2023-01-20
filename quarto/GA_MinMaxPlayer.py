@@ -152,7 +152,7 @@ class GA_MinMaxPlayer(quarto.Player):
         diagonals_high_risk = status["diagonals_at_risk"]
         minmax = MinMax_Player.MinMax(self.get_game())
 
-        if (len(diagonals_high_risk) != 0 or len(rows_high_risk) != 0 or len(columns_high_risk) != 0) and status["holes"] < 8:
+        if len(diagonals_high_risk) != 0 or len(rows_high_risk) != 0 or len(columns_high_risk) != 0:
             can_beat_move = minmax.place_piece()
             #print(can_beat_move)
             if can_beat_move is not None:
