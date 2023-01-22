@@ -5,10 +5,13 @@ import itertools
 import logging
 import argparse
 import random
-from .quarto.objects import Player, Quarto
-from .reinforcement.rl_agent import QLAgent
-from .reinforcement.Memory import Save
+
+from GA_Player import GA_Player
+from quarto.objects import Player, Quarto
+from reinforcement.rl_agent import QLAgent
+from reinforcement.Memory import Save
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 class RandomPlayer(Player):
     """Random player"""
@@ -21,18 +24,19 @@ class RandomPlayer(Player):
     def place_piece(self) -> tuple[int, int]:
         return random.randint(0, 3), random.randint(0, 3)
 
-def train(info, train_iterations: int):
+def train(info, genome, train_iterations: int):
     max_wr = (0, -1)
     move_history = []
     indices = []
     draw_hist = []
+    path = info['Q_path']
     won = 0
     draw = 0
     game = Quarto()
-    agent = QLAgent(game, info)
-    game.set_players((RandomPlayer(game), agent))
+    agent = QLAgent(game, info, genome)
+    game.set_players((GA_Player(game, {'alpha': 0.1, 'beta': 0.3}), agent))
 
-    for m in range(train_iterations):
+    for m in tqdm(range(train_iterations)):
         winner = game.run()
         agent.q_post(winner=winner)
 
@@ -44,21 +48,22 @@ def train(info, train_iterations: int):
         if m % 100 == 0 and m > 0:
             logging.info(f"{m}: won: {won} | draw : {draw}")
             winrate = won
-            move_history.append(winrate)
-            draw_hist.append(draw)
-            indices.append(m)
+            if m % 1000 == 0:
+                move_history.append(winrate)
+                draw_hist.append(draw)
+                indices.append(m)
             won = 0
             draw = 0
             if max_wr[0] < winrate:
                 max_wr = (winrate, m)
         game.reset()
-        if m % 2 == 1:
-            game.set_players((agent, RandomPlayer(game)))
+        '''if m % 2 == 1:
+            game.set_players((agent, GA_Player(game, {'alpha': 0.1, 'beta': 0.3})))
         else:
-            game.set_players((RandomPlayer(game), agent))
+            game.set_players((GA_Player(game, {'alpha': 0.1, 'beta': 0.3}), agent))'''
 
-    #Save(agent.Q, path)
     logging.info(f'max winrate: {max_wr}')
+    # Save(agent.Q, path)
     plt.ylabel('winrate %')
     plt.xlabel('# games')
     plt.ylim(0, 100)
@@ -78,7 +83,8 @@ def main():
         'Q_path': './quarto/reinforcement/Q_data.dat'
     }
 
-    train(info, 200_000)
+    genome = {'alpha': 0.1, 'beta': 0.3}
+    train(info, genome, 1_000_000)
     '''
     game = Quarto()
     agent = QLAgent(game, info)

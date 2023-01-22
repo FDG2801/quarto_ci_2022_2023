@@ -1,12 +1,14 @@
-from .Memory import RememberOrig
-from ..quarto.objects import Player
+from itertools import combinations
+from reinforcement.Memory import RememberOrig
+from quarto.objects import Player
 import random
-from .tables import Table
+from reinforcement.tables import Table
 import numpy as np
 import copy
-import logging
+from reinforcement.utils import cook_status
+
 class QLAgent(Player):
-    def __init__(self, quarto, info):
+    def __init__(self, quarto, info, genome):
         super().__init__(quarto)
         self.Q = RememberOrig(filename=info['Q_path'])
         self.alpha = info['alpha']
@@ -18,7 +20,7 @@ class QLAgent(Player):
         self.state_history = None
         self.quarto = quarto
         self.available_pieces = {i for i in range(16)}
-
+        self.genome = genome
         self.games = 0
 
     def set_game(self, quarto):
@@ -42,25 +44,31 @@ class QLAgent(Player):
         Possible idea is to retrieve the piece which minimizes the Q-table score,
         or to create a new Q-table.
         '''
-        state = self.get_board(type='tuple')
-        piece = None
-        available_pieces = self.get_available_pieces()
+        game = self.get_game()
+        board = game.get_board_status()
+        elements_per_type = cook_status(game, board)["elements_per_type"]
 
-        # Check if state is in Q_table with 3 rotations
-        for i in [1,2,3]:
-            state_tmp = self.get_board(type='tuple', X=np.rot90(self.get_board(), i))
-            if state_tmp in self.Q:
-                state = state_tmp
-                break
+        alpha = self.genome["alpha"]
+        elements = 4
+        if alpha < random.random():
 
-        if state in self.Q and self.games > 50_000:
-            legal_pieces = {k: v for k, v in self.Q[state].items() if k[1] in available_pieces}
-            _, piece = min(legal_pieces, key=legal_pieces.get)
-            logging.debug(f'RL gives other {piece=}')
+            while True:
+                sorted_combinations = list(
+                    combinations(sorted(elements_per_type, key=lambda i: i[0])[:elements], r=4))
+                for combination in sorted_combinations:
+                    piece_val = sum([val for e, val in combination])
+                    if piece_val not in board:
+                        return piece_val
+                elements += 1
         else:
-            piece = random.randint(0, 15)
-
-        return piece
+            while True:
+                sorted_combinations = list(
+                    combinations(sorted(elements_per_type, key=lambda i: i[0], reverse=True)[:elements], r=4))
+                for combination in sorted_combinations:
+                    piece_val = sum([val for e, val in combination])
+                    if piece_val not in board:
+                        return piece_val
+                    elements += 1
 
     def get_available_pieces(self) -> list:
         state = super().get_game().get_board_status()
