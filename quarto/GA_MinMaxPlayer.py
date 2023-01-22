@@ -111,9 +111,14 @@ class GA_MinMaxPlayer(quarto.Player):
         columns_high_risk = status["columns_at_risk"][4]
         diagonals_high_risk = status["diagonals_at_risk"]
         minmax = MinMax_Player.MinMax(self.get_game())
+        #not_winning_pieces = minmax.cp()
+        #if not_winning_pieces is not None:
+        #    return not_winning_pieces
+        #else:
+        #    not_winning_pieces = list()
 
         if len(diagonals_high_risk) != 0 or len(rows_high_risk) != 0 or len(columns_high_risk) != 0:
-            not_winning_pieces = minmax.not_winning_pieces(board)
+            not_winning_pieces =  minmax.not_winning_pieces(board)
             if len(not_winning_pieces) == 1:
                 return not_winning_pieces[0]
 
@@ -153,10 +158,16 @@ class GA_MinMaxPlayer(quarto.Player):
         minmax = MinMax_Player.MinMax(self.get_game())
 
         if len(diagonals_high_risk) != 0 or len(rows_high_risk) != 0 or len(columns_high_risk) != 0:
-            can_beat_move = minmax.place_piece()
-            #print(can_beat_move)
-            if can_beat_move is not None:
-                return can_beat_move
+            if status['holes']< 8:
+                can_beat_move = minmax.place_piece(8) # 10 
+                #print(can_beat_move)
+                if can_beat_move is not None:
+                    return can_beat_move
+            else:
+                can_beat_move = minmax.place_piece(max((16 - status['holes'] - 3), 1)) #max(16 - holes - 1, 1)
+                #print(can_beat_move)
+                if can_beat_move is not None:
+                    return can_beat_move
 
         if len(diagonals_high_risk) != 0:
             diagonal = random.choice(diagonals_high_risk)  # 1 or 2

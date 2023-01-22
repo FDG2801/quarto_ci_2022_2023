@@ -94,6 +94,7 @@ class Quarto(object):
             self._board[y, x] = self.__selected_piece_index
             self.__binary_board[y,
                                 x][:] = self.__pieces[self.__selected_piece_index].binary
+            #print(self.__binary_board)
             return True
         return False
 

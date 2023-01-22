@@ -3,23 +3,6 @@ import copy
 import numpy
 from minimax import minmax
 
-class QuartoMinMax(quarto.Quarto):
-    def __init__(self) -> None:
-        '''
-        This is an upgraded quarto class used by minmax to avoid creating multiple objects, what it does is saving the second-to-last move
-        and restore the board after every move, this is done because minmax is recursive.
-
-        So we introduce:
-        _last_board
-        _last_choosen_piece
-        '''
-        super().__init__()
-        self._last_choosen_piece = 0
-        self._last_board = 0
-        
-        
-    
-
 class MinMax(quarto.Player):
     """MinMax agent"""
 
@@ -29,72 +12,64 @@ class MinMax(quarto.Player):
     # def get_game(self) -> quarto.Quarto:
     #     return super().get_game()
 
-    def choose_piece(self) -> int:
-        ''' choose_piece using minmax ??? '''
-        # print("Choosing piece -------------- ")
-        # function to chose_piece
-        # return random.randint(0, 15)
-        # # ------------------------------------------------------
-        # Choose the best piece to play with using a heuristic function
-        quarto = self.get_game()
-        best_score = -float('inf')
-        best_piece = None
-        for piece in range(15):
-            if self.piece_available(piece):
-                score = self.heuristic()
-                if score > best_score:
-                    best_score = score
-                    best_piece = piece
-        # print('best piece: ',best_piece)
-        return best_piece
-
-    def place_piece(self) -> tuple[int, int]:
-        '''place_piece using minmax ??? '''
-        #print("Placing piece -------------- ")
+    def cp(self):
         game = self.get_game()
-        game_test = QuartoMinMax()
-        game_test._board = game._board
-        game_test._current_player = game._current_player
-        index = int(game.get_selected_piece())
-        game_test.__selected_piece_index = index
-        game_test._last_choosen_piece = index
-        game_test._last_board = game._board
-        move = minmax(game, 1)
-        #print(move)
-        return move  # problem here
+        #print(game.get_piece_charachteristics(3).binary)
+        board = game.get_board_status()
+        #print(board)
+        b_board = numpy.full(
+            shape=(4, 4, 4), fill_value=numpy.nan)
+        #print(b_board) 
+        for i,r in enumerate(board):
+            for j in range(len(r)):
+                b_board[i,j] = game.get_piece_charachteristics(r[j]).binary if r[j] != -1 else numpy.nan
+        #print(b_board)    
+    
+        available_pieces = list(set(range(16)) - set(game.get_board_status().ravel()))
+        available_pieces = [(game.get_piece_charachteristics(p).binary, p) for p in available_pieces] # [bool,bool,bool,bool] , idx
+        #piece_prop = dict()
         
-        #return random.randint(0, 3), random.randint(0, 3)
-        
+        hsum =  ((b_board == 0).sum(axis = 1).sum(axis = 0), (b_board == 1).sum(axis = 1).sum(axis = 0)) #(list of num of 0s prop, list of num of 1s prop)
+        vsum= ((b_board == 0).sum(axis = 0).sum(axis = 0), (b_board == 1).sum(axis = 0).sum(axis = 0))
+        dsum1 = (numpy.trace((b_board == 0), axis1=0, axis2=1), numpy.trace((b_board == 1), axis1=0, axis2=1))
+        dsum2 = (numpy.trace(numpy.fliplr(b_board == 0), axis1=0, axis2=1), numpy.trace(numpy.fliplr(b_board == 1), axis1=0, axis2=1))
+        #print(piece_prop)
+        risk_prop = []
+        for i in range(2):
+            risk_prop.append(hsum[i] + vsum[i] + dsum1[i] + dsum2[i])
+        min_risk = (min(risk_prop[0]),min(risk_prop[1]))
+        #print(risk_prop)
+        #print(min_risk)
+        _p = []
+        for p in available_pieces:
+            risk_vect = [risk_prop[0][i] if p[0][i] == 0 else risk_prop[1][i] for i in range(len(p[0]))]
+            _p.append((p[1], max(risk_vect)))
+        #print(_p)
+        _p.sort(key = lambda x: x[1])
+        #print(_p)
+        return _p[0][0] if _p[0][1] == min_risk[0] or _p[0][1] == min_risk[1] else None #_p[0:(len(available_pieces)//2)]
 
-        # Choose a position to place the piece based on a heuristic function
-        # quarto = self.get_game()
-        #best_score = -float('inf')
-        #best_move = None
-        #for move in self.possible_moves():
-        #    new_board = quarto.get_board_status()
-        #    score = self.heuristic()
-        #    if score > best_score:
-        #        best_score = score
-        #        best_move = move
-        #        # print("Best move: ",best_move)
-        #        # piece=self.choose_piece()
-        #        # self.modify_board(new_board,piece,best_move)
-        #return best_move[1], best_move[0]
-        # ---------------------------------------------------------
+   
 
-    def can_beat_one_level(self) -> tuple[bool, tuple]:
-        # Choose a position to place the piece based on a heuristic function
-        current_quarto = self.get_game()
-        score = 0
-        for move in self.possible_moves():
-            quarto_copy = copy.deepcopy(current_quarto)
+    def place_piece(self, depth) -> tuple[int, int]:
+        '''place_piece using minmax'''
+        game = self.get_game()
+        move = minmax(game, depth)
+        return move 
+    
+    # def can_beat_one_level(self) -> tuple[bool, tuple]:
+    #     # Choose a position to place the piece based on a heuristic function
+    #     current_quarto = self.get_game()
+    #     score = 0
+    #     for move in self.possible_moves():
+    #         quarto_copy = copy.deepcopy(current_quarto)
 
-            quarto_copy.place(move[0], move[1])
-            score = self.heuristic2(quarto_copy)
-            if score == float('inf'):
-                return True, (move[1], move[0])
+    #         quarto_copy.place(move[0], move[1])
+    #         score = self.heuristic2(quarto_copy)
+    #         if score == float('inf'):
+    #             return True, (move[1], move[0])
 
-        return False, None
+    #     return False, None
 
     def not_winning_pieces(self, board: numpy.ndarray) -> list:
         current_quarto = self.get_game()
@@ -104,7 +79,7 @@ class MinMax(quarto.Player):
         for i in range(4):
             for j in range(4):
                 if board[i][j] == -1:
-                    moves.append((i, j))
+                    moves.append((j, i))
         for piece in available_pieces:
             this_piece_can_win = False
             for move in moves:
@@ -120,12 +95,7 @@ class MinMax(quarto.Player):
 
         return not_winning_pieces
 
-    # def modify_board(self, board,piece,pos):
-    #     print("Modifying board ------")
-    #     board[pos[0]][pos[1]] = piece
-    #     print("Modified board ------")
-    #     print(board)
-
+  
     def piece_available(self, piece) -> bool:
         # Iterate over the board and check if the given piece has already been played
         # print("Is piece available? -------------- ")
