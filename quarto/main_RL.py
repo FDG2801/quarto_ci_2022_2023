@@ -44,14 +44,21 @@ def train(info, genome, train_iterations: int):
             won += 1
         elif winner == -1:
             draw += 1
+    for m in tqdm(range(train_iterations)):
+        winner = game.run()
+        agent.q_post(winner=winner)
 
-        if m % 100 == 0 and m > 0:
-            logging.info(f"{m}: won: {won} | draw : {draw}")
+        if winner == 1:
+            won += 1
+        elif winner == -1:
+            draw += 1
+
+        if m % 10_000 == 0 and m > 0:
             winrate = won
-            if m % 1000 == 0:
-                move_history.append(winrate)
-                draw_hist.append(draw)
-                indices.append(m)
+            logging.info(f"{m}: won: {won/100} | draw : {draw/100}")
+            move_history.append(winrate)
+            draw_hist.append(draw)
+            indices.append(m)
             won = 0
             draw = 0
             if max_wr[0] < winrate:
@@ -63,13 +70,15 @@ def train(info, genome, train_iterations: int):
             game.set_players((GA_Player(game, {'alpha': 0.1, 'beta': 0.3}), agent))'''
 
     logging.info(f'max winrate: {max_wr}')
-    # Save(agent.Q, path)
     plt.ylabel('winrate %')
     plt.xlabel('# games')
+    plt.xlim(0, train_iterations)
     plt.ylim(0, 100)
     plt.plot(indices, move_history, "b")
     #plt.plot(indices, draw_hist, "b")
+    plt.savefig('./million_RL&GA_vs_GA_2nd.svg')
     plt.show()
+    Save(agent.Q, path)
 
 
 def main():
