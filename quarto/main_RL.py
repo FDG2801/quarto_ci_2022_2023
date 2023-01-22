@@ -9,6 +9,7 @@ from .quarto.objects import Player, Quarto
 from .reinforcement.rl_agent import QLAgent
 from .reinforcement.Memory import Save
 import matplotlib.pyplot as plt
+
 class RandomPlayer(Player):
     """Random player"""
 
@@ -24,10 +25,10 @@ def train(info, train_iterations: int):
     max_wr = (0, -1)
     move_history = []
     indices = []
+    draw_hist = []
     won = 0
+    draw = 0
     game = Quarto()
-    path = info['Q_path']
-
     agent = QLAgent(game, info)
     game.set_players((RandomPlayer(game), agent))
 
@@ -37,38 +38,47 @@ def train(info, train_iterations: int):
 
         if winner == 1:
             won += 1
+        elif winner == -1:
+            draw += 1
+
         if m % 100 == 0 and m > 0:
-            print(f"{m}: {won}")
+            logging.info(f"{m}: won: {won} | draw : {draw}")
             winrate = won
             move_history.append(winrate)
+            draw_hist.append(draw)
             indices.append(m)
             won = 0
+            draw = 0
             if max_wr[0] < winrate:
                 max_wr = (winrate, m)
-        game = Quarto()
-        agent.set_game(game)
-        game.set_players((RandomPlayer(game), agent))
+        game.reset()
+        if m % 2 == 1:
+            game.set_players((agent, RandomPlayer(game)))
+        else:
+            game.set_players((RandomPlayer(game), agent))
 
-    Save(agent.Q, path)
-    logging.warning(f'max winrate: {max_wr}')
+    #Save(agent.Q, path)
+    logging.info(f'max winrate: {max_wr}')
     plt.ylabel('winrate %')
     plt.xlabel('# games')
     plt.ylim(0, 100)
     plt.plot(indices, move_history, "b")
+    #plt.plot(indices, draw_hist, "b")
     plt.show()
+
+
 def main():
     info = {
-        'alpha': 0.3,   # learning rate
+        'alpha': 0.1,   # learning rate
         'gamma': 0.9,   # memory
-        'epsilon': 0.2, # chance of making a random move
+        'epsilon': 1,   # chance of making a random move
+        'min_epsilon': 0.1,
+        'epsilon_decay': 0.9995,
         'train': True,
         'Q_path': './quarto/reinforcement/Q_data.dat'
     }
 
-
-
-    train(info, 10000)
-    #
+    train(info, 200_000)
     '''
     game = Quarto()
     agent = QLAgent(game, info)
@@ -79,7 +89,7 @@ def main():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--verbose', action='count', default=0, help='increase log verbosity')
+    parser.add_argument('-v', '--verbose', action='count', default=1, help='increase log verbosity')
     parser.add_argument('-d',
                         '--debug',
                         action='store_const',
