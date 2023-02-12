@@ -14,18 +14,11 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
 
-class RandomPlayer(Player):
-    """Random player"""
+def train_test(info, genome, train_iterations: int, precision: int):
+    '''
+        Modify info['train'] to choose training or testing modality
+    '''
 
-    def __init__(self, game: Quarto) -> None:
-        super().__init__(game)
-    #choose piece -> int
-    def choose_piece(self) -> int:
-        return random.randint(0, 15)
-    def place_piece(self) -> tuple[int, int]:
-        return random.randint(0, 3), random.randint(0, 3)
-
-def train(info, genome, train_iterations: int, precision: int):
     max_wr = (0, -1)
     move_history = []
     indices = []
@@ -79,19 +72,13 @@ def main():
         'epsilon': 1,   # chance of making a random move
         'min_epsilon': 0.1,
         'epsilon_decay': 0.9995,
-        'train': False,
+        'train': True,  # Choose
         'Q_path': './quarto/reinforcement/Q_data.dat'
     }
 
     genome = {'alpha': 0.1, 'beta': 0.3}
-    train(info, genome, 100_000, 1_000)
-    '''
-    game = Quarto()
-    agent = QLAgent(game, info)
-    game.set_players((RandomPlayer(game), agent))
-    winner = game.run()
-    '''
-    #logging.warning(f"main: Winner: player {winner}")
+    train_test(info, genome, 100_000, 1_000)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
