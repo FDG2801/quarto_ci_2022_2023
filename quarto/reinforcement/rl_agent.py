@@ -26,6 +26,7 @@ class QLAgent(Player):
     def set_game(self, quarto):
         super().__init__(quarto)
         self.state_history = ()
+
     def possible_actions(self, state, piece) -> list:
         '''
         Retrieves all possible position coupled with the selected piece.
@@ -37,13 +38,9 @@ class QLAgent(Player):
 
     def choose_piece(self) -> int:
         '''
-        at the moment it uses the same strategy as random to retrieve
-        a piece to be placed by the counterpart.
-        To be implemented better.
-
-        Possible idea is to retrieve the piece which minimizes the Q-table score,
-        or to create a new Q-table.
+        It is the same GA_Player.py choose_piece function.
         '''
+
         game = self.get_game()
         board = game.get_board_status()
         elements_per_type = cook_status(game, board)["elements_per_type"]
@@ -85,38 +82,28 @@ class QLAgent(Player):
             return X
 
     def placeable(self, state, x: int, y: int) -> bool:
-        if type(state) == 'list':
+        if type(state) == ('list' or 'tuple'):
             state = np.array(list(list(x) for x in state))
-        return not (y < 0 or x < 0 or x > 3 or y > 3 or state[x, y] >= 0)
+        return not (y < 0 or x < 0 or x > 3 or y > 3 or state[x][y] >= 0)
 
     def place_piece(self) -> tuple[int, int]:
         '''
-        It places the piece with the best scores in the Q-tables
+        It places the piece with the best scores in the Q-tables.
+
         '''
 
         if self.train:
             action = self.q_move()
-
-            #self.q_post()
-            #print('======= ACTION ========')
             return action[0][1], action[0][0]
         else:
             return self.get_value()
 
     def q_move(self) -> tuple[int, int]:
         state = self.get_board(type='tuple')
-        state_np = self.get_board()
         piece = super().get_game().get_selected_piece()
         (last_state, last_action) = self.state_history if self.state_history else (state, None)
 
         possible_actions = self.possible_actions(self.get_board(), piece)
-
-        # Check if state is in Q_table with 3 rotations
-        for i in [1,2,3]:
-            state_tmp = self.get_board(type='tuple', X=np.rot90(state_np, i))
-            if state_tmp in self.Q:
-                state = state_tmp
-                break
 
         if not state in self.Q:
             self.Q[state] = Table()
@@ -158,6 +145,9 @@ class QLAgent(Player):
 
     def get_value(self):
         state = self.get_board(type='tuple')
+        if state not in self.Q or self.Q[state] is None:
+            action = random.choice(self.possible_actions(state, None))
+            return action[0][1], action[0][0]
         action = max(self.Q[state], key=self.Q[state].get)
         return action[0][1], action[0][0]
 
@@ -176,7 +166,7 @@ class QLAgent(Player):
                 reward = 0.0
             self.state_history = None
 
-        if not action is None:
+        if action is not None:
             self.Q[state][action] += self.alpha * reward
 
         # Update epsilon

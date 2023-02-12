@@ -12,6 +12,7 @@ from reinforcement.rl_agent import QLAgent
 from reinforcement.Memory import Save
 import matplotlib.pyplot as plt
 from tqdm import tqdm
+import numpy as np
 
 class RandomPlayer(Player):
     """Random player"""
@@ -24,11 +25,10 @@ class RandomPlayer(Player):
     def place_piece(self) -> tuple[int, int]:
         return random.randint(0, 3), random.randint(0, 3)
 
-def train(info, genome, train_iterations: int):
+def train(info, genome, train_iterations: int, precision: int):
     max_wr = (0, -1)
     move_history = []
     indices = []
-    draw_hist = []
     path = info['Q_path']
     won = 0
     draw = 0
@@ -38,48 +38,39 @@ def train(info, genome, train_iterations: int):
 
     for m in tqdm(range(train_iterations)):
         winner = game.run()
-        agent.q_post(winner=winner)
-
-        if winner == 1:
-            won += 1
-        elif winner == -1:
-            draw += 1
-    for m in tqdm(range(train_iterations)):
-        winner = game.run()
-        agent.q_post(winner=winner)
+        if info['train']:
+            agent.q_post(winner=winner)
 
         if winner == 1:
             won += 1
         elif winner == -1:
             draw += 1
 
-        if m % 10_000 == 0 and m > 0:
-            winrate = won
-            logging.info(f"{m}: won: {won/100} | draw : {draw/100}")
+        if m % precision == 0 and m > 0:
+            winrate = won / precision * 100
+
+            logging.debug(f"{m}: won: {winrate} | draw : {draw / precision * 100}")
+
             move_history.append(winrate)
-            draw_hist.append(draw)
             indices.append(m)
             won = 0
             draw = 0
             if max_wr[0] < winrate:
                 max_wr = (winrate, m)
         game.reset()
-        '''if m % 2 == 1:
-            game.set_players((agent, GA_Player(game, {'alpha': 0.1, 'beta': 0.3})))
-        else:
-            game.set_players((GA_Player(game, {'alpha': 0.1, 'beta': 0.3}), agent))'''
 
-    logging.info(f'max winrate: {max_wr}')
+    avg_wr = np.array(move_history).mean()
+    logging.info(f'max winrate: {max_wr} | avg winrate: {avg_wr}')
     plt.ylabel('winrate %')
     plt.xlabel('# games')
-    plt.xlim(0, train_iterations)
     plt.ylim(0, 100)
     plt.plot(indices, move_history, "b")
-    #plt.plot(indices, draw_hist, "b")
-    plt.savefig('./million_RL&GA_vs_GA_2nd.svg')
     plt.show()
-    Save(agent.Q, path)
-
+    if not info['train']:
+        plt.savefig('./RL&GA_vs_GA_2nd_test.svg')
+    else:
+        plt.savefig('./RL&GA_vs_GA_2nd_train.svg')
+        Save(agent.Q, path)
 
 def main():
     info = {
@@ -88,12 +79,12 @@ def main():
         'epsilon': 1,   # chance of making a random move
         'min_epsilon': 0.1,
         'epsilon_decay': 0.9995,
-        'train': True,
+        'train': False,
         'Q_path': './quarto/reinforcement/Q_data.dat'
     }
 
     genome = {'alpha': 0.1, 'beta': 0.3}
-    train(info, genome, 1_000_000)
+    train(info, genome, 100_000, 1_000)
     '''
     game = Quarto()
     agent = QLAgent(game, info)
