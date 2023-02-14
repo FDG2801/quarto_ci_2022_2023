@@ -19,84 +19,50 @@ solid=piece_val & 0b0010
 square=piece_val & 0b0001
 '''
 
-def minimax_function(game, depth, maximizingPlayer, chosenPiece=None, alpha=-float('inf'), beta=float('inf')):
-    # Base case: return the score if the game is over or the depth limit has been reached
-    if depth == 0 or game.check_winner() != -1:
-        return state_eval(game, depth, maximizingPlayer)
-
-    # Recursive case: try all possible moves and choose the best one
-    if maximizingPlayer:
-        bestValue = -float('inf')
-        for move in get_all_possible_moves(game):
-            game_t = deepcopy(game)
-            piece = choose_piece(game_t)
-            game_t.place(move[0], move[1])
-            result = minimax_function(game_t, depth - 1, False, piece , alpha, beta)
-            bestValue = max(bestValue, result)
-            alpha = max(alpha, bestValue)
-            if beta <= alpha:
-                break
-        return bestValue
-    else:
-        bestValue = float('inf')
-        for move in get_all_possible_moves(game):
-            game_t = deepcopy(game)
-            piece = choose_piece(game_t)
-            game_t.place(move[0], move[1])
-            result = minimax_function(game_t, depth - 1, True, piece , alpha, beta)
-            bestValue = min(bestValue, result)
-            beta = min(beta, bestValue)
-            if beta <= alpha:
-                break
-        return bestValue
-
-def test(game, depth, maximizingPlayer, chosenPiece=None, alpha=-float('inf'), beta=float('inf')):
+def minmax(game, depth, maximizingPlayer, chosenPiece=None, alpha=-float('inf'), beta=float('inf')):
     # Base case: return the score if the game is over or the depth limit has been reached
     if depth == 0 or game.check_winner() != -1:
         return state_eval(game, depth, maximizingPlayer)
     # Recursive case: try all possible moves and choose the best one
     if maximizingPlayer:
-        bestValue = -float('inf')
-        #for move in get_all_possible_moves(game):
+        best_value = -float('inf')
         for move,piece in itertools.product(get_all_possible_moves(game),list(set(range(16)) - set(game._board.ravel()))):
                 game_t = deepcopy(game)
                 game_t.place(move[0], move[1])
                 game_t.select(piece)
-                result = test(game_t, depth - 1, False , alpha, beta)
-                bestValue = max(bestValue, result)
-                alpha = max(alpha, bestValue)
+                result = minmax(game_t, depth - 1, False , alpha, beta)
+                best_value = max(best_value, result)
+                alpha = max(alpha, best_value)
                 if beta <= alpha:
                     break
             #else:
-        return bestValue
+        return best_value
             #break
     else:
-        bestValue = float('inf')
-        #for move in get_all_possible_moves(game):
-            #for piece in list(set(range(16)) - set(game._board.ravel())):
+        best_value = float('inf')
         for move,piece in itertools.product(get_all_possible_moves(game),list(set(range(16)) - set(game._board.ravel()))):
                 game_t = deepcopy(game)
                 game_t.place(move[0], move[1])
                 game_t.select(piece)
-                result = test(game_t, depth - 1, True , alpha, beta)
-                bestValue = min(bestValue, result)
-                beta = min(beta, bestValue)
+                result = minmax(game_t, depth - 1, True , alpha, beta)
+                best_value = min(best_value, result)
+                beta = min(beta, best_value)
                 if beta <= alpha:
                     break
             #else:
-        return bestValue
+        return best_value
             #break
 
-def minmax(game, depth):
+def play(game, depth):
     scored_moves = []
     for move in get_all_possible_moves(game):
         game_t = deepcopy(game)
         game_t.place(move[0], move[1])
-        scored_moves.append((move, test(game_t, depth, False)))
+        scored_moves.append((move, minmax(game_t, depth, False)))
     scored_moves.sort(key=lambda x: x[1], reverse=True)
     scored_moves = list(filter(lambda x: x[1] != -1, scored_moves))
     #print(scored_moves)
-    return scored_moves[0][0] if scored_moves else None #if scored_moves[0][1] != float('-inf') or  scored_moves[0][1] != -1 else None #[REMOVED CONDITION] scored_moves[0][1] != float('-inf') or
+    return scored_moves[0][0] if scored_moves[0][1] != float('-inf') or  scored_moves[0][1] != -1 else None #if scored_moves[0][1] != float('-inf') or  scored_moves[0][1] != -1 else None #[REMOVED CONDITION] scored_moves[0][1] != float('-inf') or
     
 
 def choose_piece(game):
@@ -120,6 +86,8 @@ def state_eval(game_state, depth, is_maximizing):
     Computes the evaluation of the state of the game
     '''
     if game_state.check_winner() != -1:
-        return -1 if is_maximizing else EVAL_WIN + depth
-    else:
+        return -float('inf') if is_maximizing else EVAL_WIN + depth
+    elif game_state.check_finished:
         return 0
+    else:
+        return -1

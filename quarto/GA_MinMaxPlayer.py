@@ -87,12 +87,13 @@ def cook_status(game, board: numpy.ndarray) -> dict:
 
 
 class GA_MinMaxPlayer(quarto.Player):
-    def __init__(self, quarto: quarto.Quarto, genome=None) -> None:
+    def __init__(self, quarto: quarto.Quarto, genome=None, depth=1) -> None:
         super().__init__(quarto)
         if genome is not None:
             self.genome = genome
         else:
             self.genome = dict()
+        self.depth = depth
 
     def get_game(self) -> quarto.Quarto:
         return super().get_game()
@@ -111,12 +112,7 @@ class GA_MinMaxPlayer(quarto.Player):
         columns_high_risk = status["columns_at_risk"][4]
         diagonals_high_risk = status["diagonals_at_risk"]
         minmax = MinMax_Player.MinMax(self.get_game())
-        #not_winning_pieces = minmax.cp()
-        #if not_winning_pieces is not None:
-        #    return not_winning_pieces
-        #else:
-        #    not_winning_pieces = list()
-
+        
         if len(diagonals_high_risk) != 0 or len(rows_high_risk) != 0 or len(columns_high_risk) != 0:
             not_winning_pieces =  minmax.not_winning_pieces(board)
             if len(not_winning_pieces) == 1:
@@ -159,12 +155,12 @@ class GA_MinMaxPlayer(quarto.Player):
 
         if len(diagonals_high_risk) != 0 or len(rows_high_risk) != 0 or len(columns_high_risk) != 0:
             if status['holes']< 8:
-                can_beat_move = minmax.place_piece(8) # 10 
+                can_beat_move = minmax.place_piece(self.depth) # 10 
                 #print(can_beat_move)
                 if can_beat_move is not None:
                     return can_beat_move
             else:
-                can_beat_move = minmax.place_piece(max((16 - status['holes'] - 3), 1)) #max(16 - holes - 1, 1)
+                can_beat_move = minmax.place_piece(1) #max(16 - holes - 1, 1)
                 #print(can_beat_move)
                 if can_beat_move is not None:
                     return can_beat_move
