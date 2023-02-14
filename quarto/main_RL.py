@@ -13,8 +13,9 @@ from reinforcement.Memory import Save
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
+from RandomPlayer import RandomPlayer
 
-def train_test(info, genome, train_iterations: int, precision: int):
+def train_test(info, genome, train_iterations: int, precision: int, versus: str):
     '''
         Modify info['train'] to choose training or testing modality
     '''
@@ -27,7 +28,10 @@ def train_test(info, genome, train_iterations: int, precision: int):
     draw = 0
     game = Quarto()
     agent = QLAgent(game, info, genome)
-    game.set_players((GA_Player(game, {'alpha': 0.1, 'beta': 0.3}), agent))
+    if versus == 'GA':
+        game.set_players((GA_Player(game, {'alpha': 0.1, 'beta': 0.3}), agent))
+    elif versus == 'Random':
+        game.set_players((RandomPlayer(game), agent))
 
     for m in tqdm(range(train_iterations)):
         winner = game.run()
@@ -59,10 +63,11 @@ def train_test(info, genome, train_iterations: int, precision: int):
     plt.ylim(0, 100)
     plt.plot(indices, move_history, "b")
     plt.show()
+
     if not info['train']:
-        plt.savefig('./RL&GA_vs_GA_2nd_test.svg')
+        plt.savefig(f'./RL&GA_vs_{versus}_2nd_test.svg')
     else:
-        plt.savefig('./RL&GA_vs_GA_2nd_train.svg')
+        plt.savefig(f'./RL&GA_vs_{versus}_2nd_train.svg')
         Save(agent.Q, path)
 
 def main():
@@ -73,11 +78,18 @@ def main():
         'min_epsilon': 0.1,
         'epsilon_decay': 0.9995,
         'train': True,  # Choose
-        'Q_path': './quarto/reinforcement/Q_data.dat'
+        'Q_path': './quarto/reinforcement/Q_data_RL_GA.dat'
     }
-
+    
     genome = {'alpha': 0.1, 'beta': 0.3}
-    train_test(info, genome, 100_000, 1_000)
+    # Train against GA
+    train_test(info, genome, 100_000, 1_000, 'GA')
+
+    info['train'] = False
+    # Test against GA, trained against GA
+    train_test(info, genome, 100_000, 1_000, 'GA')
+    # Test against Random, trained against GA
+    train_test(info, genome, 100_000, 1_000, 'Random')
 
 
 if __name__ == '__main__':
