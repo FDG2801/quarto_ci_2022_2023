@@ -67,10 +67,10 @@ def train_test(info, genome, train_iterations: int, precision: int, versus: str)
     if info['train']:
         decay = info['epsilon_decay']
         lr = info['alpha']
-        plt.savefig(f'./RL&GA_vs_{versus}_eps{decay}_alpha{lr}_train.svg')
+        plt.savefig(f'./quarto/reinforcement/images/RL&GA_vs_{versus}_eps{decay}_alpha{lr}_train.svg')
         Save(agent.Q, path)
     else:
-        plt.savefig(f'./RL&GA_vs_{versus}_2nd_test.svg')
+        plt.savefig(f'./quarto/reinforcement/images/RL&GA_vs_{versus}_2nd_test.svg')
     
     plt.show()
 
