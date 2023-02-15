@@ -6,19 +6,6 @@ EVAL_TIE = 0  # this draw value only matters in the endgame, where the heuristic
 EVAL_WIN = 1 
 MAX_DEPTH = 4
 
-'''
-TODO:
-- game_state must be adapted with the professor's code OK
-- test OK
-- add heuristics (?) to choose piece/to place the piece
-
-
-high=piece_val & 0b1000
-coloured=piece_val & 0b0100
-solid=piece_val & 0b0010
-square=piece_val & 0b0001
-'''
-
 def minmax(game, depth, maximizingPlayer, chosenPiece=None, alpha=-float('inf'), beta=float('inf')):
     # Base case: return the score if the game is over or the depth limit has been reached
     if depth == 0 or game.check_winner() != -1:
