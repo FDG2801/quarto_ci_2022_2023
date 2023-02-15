@@ -24,6 +24,7 @@ def train_test(info, genome, train_iterations: int, precision: int, versus: str)
     move_history = []
     indices = []
     path = info['Q_path']
+
     won = 0
     draw = 0
     game = Quarto()
@@ -62,13 +63,16 @@ def train_test(info, genome, train_iterations: int, precision: int, versus: str)
     plt.xlabel('# games')
     plt.ylim(0, 100)
     plt.plot(indices, move_history, "b")
-    plt.show()
 
-    if not info['train']:
-        plt.savefig(f'./RL&GA_vs_{versus}_2nd_test.svg')
-    else:
-        plt.savefig(f'./RL&GA_vs_{versus}_2nd_train.svg')
+    if info['train']:
+        decay = info['epsilon_decay']
+        lr = info['alpha']
+        plt.savefig(f'./RL&GA_vs_{versus}_eps{decay}_alpha{lr}_train.svg')
         Save(agent.Q, path)
+    else:
+        plt.savefig(f'./RL&GA_vs_{versus}_2nd_test.svg')
+    
+    plt.show()
 
 def main():
     info = {
@@ -87,9 +91,9 @@ def main():
 
     info['train'] = False
     # Test against GA, trained against GA
-    train_test(info, genome, 100_000, 1_000, 'GA')
+    train_test(info, genome, train_iterations=30_000, precision=300, versus='GA')
     # Test against Random, trained against GA
-    train_test(info, genome, 100_000, 1_000, 'Random')
+    train_test(info, genome, train_iterations=30_000, precision=300, versus='Random')
 
 
 if __name__ == '__main__':
