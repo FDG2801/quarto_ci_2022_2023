@@ -74,21 +74,26 @@ def cook_status(game, board: numpy.ndarray) -> dict:
     if holes_count_secondary == 1:
         diagonals_at_risk.append(2)  # at this point the secondary diagonal is at risk
 
+    holes = 0
+    for i in range(4):
+        holes += list(board[i]).count(-1)
     status["elements_per_type"] = elements_per_type
     status["rows_at_risk"] = rows_at_risk
     status["columns_at_risk"] = columns_at_risk
     status["diagonals_at_risk"] = diagonals_at_risk
+    status["holes"] = holes
 
     return status
 
 
 class GA_MinMaxPlayer(quarto.Player):
-    def __init__(self, quarto: quarto.Quarto, genome=None) -> None:
+    def __init__(self, quarto: quarto.Quarto, genome=None, depth=1) -> None:
         super().__init__(quarto)
         if genome is not None:
             self.genome = genome
         else:
             self.genome = dict()
+        self.depth = depth
 
     def get_game(self) -> quarto.Quarto:
         return super().get_game()
@@ -107,9 +112,9 @@ class GA_MinMaxPlayer(quarto.Player):
         columns_high_risk = status["columns_at_risk"][4]
         diagonals_high_risk = status["diagonals_at_risk"]
         minmax = MinMax_Player.MinMax(self.get_game())
-
+        
         if len(diagonals_high_risk) != 0 or len(rows_high_risk) != 0 or len(columns_high_risk) != 0:
-            not_winning_pieces = minmax.not_winning_pieces(board)
+            not_winning_pieces =  minmax.not_winning_pieces(board)
             if len(not_winning_pieces) == 1:
                 return not_winning_pieces[0]
 
@@ -149,9 +154,16 @@ class GA_MinMaxPlayer(quarto.Player):
         minmax = MinMax_Player.MinMax(self.get_game())
 
         if len(diagonals_high_risk) != 0 or len(rows_high_risk) != 0 or len(columns_high_risk) != 0:
-            can_beat_move = minmax.can_beat_one_level()
-            if can_beat_move[0]:
-                return can_beat_move[1]
+            if status['holes']< 8:
+                can_beat_move = minmax.place_piece(self.depth) # 10 
+                #print(can_beat_move)
+                if can_beat_move is not None:
+                    return can_beat_move
+            else:
+                can_beat_move = minmax.place_piece(1) #max(16 - holes - 1, 1)
+                #print(can_beat_move)
+                if can_beat_move is not None:
+                    return can_beat_move
 
         if len(diagonals_high_risk) != 0:
             diagonal = random.choice(diagonals_high_risk)  # 1 or 2
